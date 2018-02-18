@@ -10,6 +10,7 @@ import shlex
 import shutil
 import tempfile
 import boto3
+from utill import *
 
 def create_db_connection(hostname,database,username,password,port):
     try:
@@ -24,7 +25,8 @@ def create_db_connection(hostname,database,username,password,port):
 
     return connection
 
-def store_data(trgt_db_conn,table,s3_bucket_path,aws_role_arn):
+def store(trgt_db_conn,table,s3_bucket_path,aws_role_arn):
+    print "test"
     cur = trgt_db_conn.cursor()
 
     cur.execute("TRUNCATE "+table)
@@ -53,7 +55,7 @@ def process(args,table_desc):
 
     trgt_db_conn = create_db_connection(args.trgt_db_host,args.trgt_db_name,args.trgt_username,args.trgt_password,args.trgt_port)
     s3_bucket_path = args.target_s3_path +"/"+table
-    store_data(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
+    store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
 
 def store_data(args):
     max_process= multiprocessing.cpu_count()
