@@ -13,38 +13,11 @@ import shlex
 import shutil
 import tempfile
 import boto3
+from utill import *
 
 def destroy_s3_bucket(s3_bucket_path):
     command = "aws s3 rm "+s3_bucket_path+" --recursive"
     subprocess.call(command,shell=True)
-
-def create_db_connection(hostname,database,username,password,port):
-    try:
-        connection = psycopg2.connect(
-            database = database,
-            user = username,
-            password = password,
-            host = hostname,
-            port = port)
-    except:
-        print ("unable to connect to database")
-
-    return connection
-
-def download_s3_data(source,dest):
-    bucket_name = source.split('/')[2]
-    prefix = '/'.join(source.split('/')[3:])
-
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(bucket_name)
-    object_coll = bucket.objects.filter(Prefix=prefix)
-    for object_ in object_coll:
-        file_name = object_.key.split('/').pop()
-        if file_name == '':
-            continue
-
-        s3.Object(bucket_name, object_.key).download_file(
-            dest + os.sep + file_name)
 
 def get_table_desc(tables):
     if(tables.startswith("s3")):
@@ -66,18 +39,7 @@ def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_p
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url +" --username "+ src_username+" --password " + src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m "+str(number_of_mappers) + " --split-by t."+split_column
     else:
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url +" --username "+ src_username+" --password " + src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m 1"
-    # print(cmd_dump_to_s3)
     subprocess.call(cmd_dump_to_s3,shell=True)
-    
-def store_data(trgt_db_conn,table,s3_bucket_path,aws_role_arn):
-    cur = trgt_db_conn.cursor()
-
-    cur.execute("TRUNCATE "+table)
-    cur.execute("COMMIT;")
-    cmd_copy_to_trgt = "copy "+ table +" from '"+ s3_bucket_path +"'"+" iam_role '"+aws_role_arn+"'"+" format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs';"
-    cur.execute (cmd_copy_to_trgt)
-    cur.execute("COMMIT;")
-    print ("PROCESSING COMPLETE FOR TABLE : "+table)
 
 def process(args,table_desc):
     table_desc = table_desc.strip()
@@ -90,10 +52,11 @@ def process(args,table_desc):
     else:
         number_of_mappers=1
 
-    trgt_db_conn = create_db_connection(args.trgt_db_host,args.trgt_db_name,args.trgt_username,args.trgt_password,args.trgt_port)
     s3_bucket_path = args.target_s3_path +"/"+table
-    stage_src_data(table,s3_bucket_path,args.src_driver,args.src_db_url,args.src_username,args.src_password,number_of_mappers,split_column)
-    store_data(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
+    try:
+        stage_src_data(table,s3_bucket_path,args.src_driver,args.src_db_url,args.src_username,args.src_password,number_of_mappers,split_column)
+    except:
+        print("ERROR PROCESSING TABLE : "+table)
 
 
 def sync_data(args):
@@ -122,11 +85,6 @@ if __name__ == '__main__':
     parser.add_argument('--src_password', action="store", dest="src_password", required=True)
 
 
-    parser.add_argument('--trgt_db_host', action="store", dest="trgt_db_host", required=True)
-    parser.add_argument('--trgt_db_name', action="store", dest="trgt_db_name", required=True)
-    parser.add_argument('--trgt_username', action="store", dest="trgt_username", required=True)
-    parser.add_argument('--trgt_password', action="store", dest="trgt_password", required=True)
-    parser.add_argument('--trgt_port', action="store", dest="trgt_port", required=True)
     parser.add_argument('--degree_of_parallelism', action="store", dest="degree_of_parallelism", type=int, default=1)
     parser.add_argument('--number_of_mappers', action="store", dest="number_of_mappers", type=int, default=1)
 

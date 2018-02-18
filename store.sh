@@ -1,0 +1,2 @@
+source env/bin/activate
+python sync.py   --aws_role_arn "arn:aws:iam::_________"   --tables "s3://ash.data/khirul/sqoop-script-2/tables.txt"   --target_s3_path "target s3 path"   --trgt_db_host "target database host"   --trgt_db_name "target database name"   --trgt_username "admin"   --trgt_password "****"   --trgt_port "5439" --degree_of_parallelism 1

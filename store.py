@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./env/lib/python2.7/site-packages/')
+sys.path.append('./env/lib64/python2.7/site-packages/')
 import argparse
 import subprocess
 import psycopg2
@@ -55,7 +58,10 @@ def process(args,table_desc):
 
     trgt_db_conn = create_db_connection(args.trgt_db_host,args.trgt_db_name,args.trgt_username,args.trgt_password,args.trgt_port)
     s3_bucket_path = args.target_s3_path +"/"+table
-    store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
+    try:
+        store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
+    except:
+        print("ERROR PROCESSING TABLE : "+table)
 
 def store_data(args):
     max_process= multiprocessing.cpu_count()
