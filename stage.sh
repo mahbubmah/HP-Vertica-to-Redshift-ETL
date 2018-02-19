@@ -1,2 +1,0 @@
-source env/bin/activate
-python copy.py   --aws_role_arn "********"   --src_driver "com.vertica.jdbc.Driver"   --src_db_url "source database url"   --src_username "user name"   --src_password "password"   --tables "table path"   --target_s3_path "target s3 path " --degree_of_parallelism 1 --number_of_mappers 1
