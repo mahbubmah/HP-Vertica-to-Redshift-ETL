@@ -63,7 +63,7 @@ def process(args,table_desc):
        store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
     except:
        print("ERROR PROCESSING TABLE : "+table)
-        print(sys.exc_info()[0])
+       print(sys.exc_info()[0])
 
 def store_data(args):
     max_process= multiprocessing.cpu_count()
