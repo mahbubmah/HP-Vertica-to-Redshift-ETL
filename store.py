@@ -58,10 +58,12 @@ def process(args,table_desc):
 
     trgt_db_conn = create_db_connection(args.trgt_db_host,args.trgt_db_name,args.trgt_username,args.trgt_password,args.trgt_port)
     s3_bucket_path = args.target_s3_path +"/"+table
+    # store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
     try:
-        store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
+       store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
     except:
-        print("ERROR PROCESSING TABLE : "+table)
+       print("ERROR PROCESSING TABLE : "+table)
+        print(sys.exc_info()[0])
 
 def store_data(args):
     max_process= multiprocessing.cpu_count()
