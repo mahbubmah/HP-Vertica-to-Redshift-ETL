@@ -10,7 +10,7 @@ import shlex
 import shutil
 import tempfile
 import boto3
-import configparser
+import ConfigParser
 import json
 
 
@@ -31,7 +31,7 @@ def download_s3_data(source,dest):
 
 
 def read_config(path='config.json'):
-    config=configparser.ConfigParser()
+    config=ConfigParser.ConfigParser()
 
     with open(path,'r') as f:
         config=json.load(f)
