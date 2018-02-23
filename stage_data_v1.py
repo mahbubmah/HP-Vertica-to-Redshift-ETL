@@ -51,9 +51,16 @@ def sync_data(args):
     else:
         pool = Pool(args.degree_of_parallelism)
 
+    list_process=process_list(args.tables)
     sub_process=partial(process, args)
-    pool.map(sub_process, args.tables)
+    pool.map(sub_process, list_process)
 
+def process_list(tables_args):
+    list_process=[]
+    for table in tables_args:
+        list_process.append(table)
+        
+    return list_process
 
 if __name__ == '__main__':
     config=read_config()
