@@ -21,29 +21,10 @@
     "is_encrypted_pw": false
   },
   "tables": {
-    "list": [{
-        "schema":"",
-        "name": "employee_dimension",
-        "keys":[{
-                "name":"employee_key"
-              },
-              {
-                "name":"test_key"
-              }]
-      },
+    "list": [
       {
         "schema":"",
         "name": "DimMktSource",
-        "keys":[{
-                "name":"employee_key"
-              },
-              {
-                "name":"test_key2"
-              }]
-      },      
-      {
-        "schema":"",
-        "name": "test_table",
         "keys": null
       }
     ]

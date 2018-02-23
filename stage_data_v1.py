@@ -26,14 +26,7 @@ def stage_src_data(args,table_name,p_kyes):
     destroy_s3_bucket(s3_bucket_path)
 
     query = 'SELECT t.* FROM '+table_name+' t where $CONDITIONS'
-    cmd_dump_to_s3 = 
-        "sqoop import --driver " + args.src_driver + 
-        " --connect " + args.src_db_url +
-        " --username "+ args.src_username+
-        " --password " + args.src_password +   
-        " --query '"+ query +
-        "' --target-dir "+ s3_bucket_path +
-        " --direct --as-avrodatafile -m "+str( args.number_of_mappers)
+    cmd_dump_to_s3 = "sqoop import --driver " + args.src_driver + " --connect " + args.src_db_url +" --username "+ args.src_username+" --password " + args.src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m "+str( args.number_of_mappers)
 
     if( args.number_of_mappers>1 and p_kyes!=[]):
         split_column=' t.'+(', t.'.join(p_kyes))        
