@@ -10,6 +10,9 @@ import shlex
 import shutil
 import tempfile
 import boto3
+import configparser
+import json
+
 
 def download_s3_data(source,dest):
     bucket_name = source.split('/')[2]
@@ -25,3 +28,13 @@ def download_s3_data(source,dest):
 
         s3.Object(bucket_name, object_.key).download_file(
             dest + os.sep + file_name)
+
+
+def read_config(path='config.json'):
+    config=configparser.ConfigParser()
+
+    with open(path,'r') as f:
+        config=json.load(f)
+
+    return config
+

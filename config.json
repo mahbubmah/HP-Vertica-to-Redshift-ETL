@@ -1,0 +1,51 @@
+{
+  "aws": {
+    "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
+    "s3_path": "s3://ash.data/vertica/02-13",
+    "number_of_mappers": 1,
+    "degree_of_parallelism": 1
+  },
+  "source_db": {
+    "driver": "com.vertica.jdbc.Driver",    
+    "db_url": "jdbc:vertica://172.31.29.108/sabredb",
+    "username": "dbadmin",
+    "password": "vfr45tgb",
+    "is_encrypted_pw": false
+  },
+  "target_db": {
+    "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
+    "port": "5439",
+    "db_name": "qsdata",
+    "username": "admin",
+    "password": "Vfr45tgb",
+    "is_encrypted_pw": false
+  },
+  "tables": {
+    "list": [{
+        "schema":"",
+        "name": "employee_dimension",
+        "keys":[{
+                "name":"employee_key"
+              },
+              {
+                "name":"test_key"
+              }]
+      },
+      {
+        "schema":"",
+        "name": "DimMktSource",
+        "keys":[{
+                "name":"employee_key"
+              },
+              {
+                "name":"test_key2"
+              }]
+      },      
+      {
+        "schema":"",
+        "name": "test_table",
+        "keys": null
+      }
+    ]
+  }
+}
