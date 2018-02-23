@@ -56,6 +56,7 @@ def sync_data(args):
 
 
 if __name__ == '__main__':
+    config=read_config()
     parser = argparse.ArgumentParser(description='data transfer')
     parser.add_argument('--aws_role_arn', action="store", dest="aws_role_arn"
         , required=False, default=config['aws']['role_arn'])
