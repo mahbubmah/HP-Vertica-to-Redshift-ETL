@@ -83,10 +83,10 @@ def sync_data(args):
     else:
         pool = Pool(args.degree_of_parallelism)
 
-    process(args,'DimMktSource')
-    # table_desc_list = get_table_desc(args.tables)
-    # sub_process=partial(process, args)
-    # pool.map(sub_process, table_desc_list)
+    # process(args,'DimMktSource')
+    table_desc_list = get_table_desc(args.tables)
+    sub_process=partial(process, args)
+    pool.map(sub_process, table_desc_list)
 
 
 if __name__ == '__main__':
