@@ -48,7 +48,7 @@ def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_p
     destroy_s3_bucket(s3_bucket_path) 
 
     
-    query = "select "+(', '.join(l_column_names))+" FROM "+table+"  where $CONDITIONS"
+    query = "select "+(', '.join(str(v[0]) for v in l_column_names))+" FROM "+table+"  where $CONDITIONS"
     print(query)
     if(number_of_mappers>1):
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url +" --username "+ src_username+" --password " + src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m "+str(number_of_mappers) + " --split-by t."+split_column
