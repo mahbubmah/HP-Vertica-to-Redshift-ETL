@@ -22,8 +22,8 @@ def destroy_s3_bucket(s3_bucket_path):
 def lower_table_column_names(table_name):
     connection=connect_vertica_db()
     cursor=connection.cursor()
-
-    cursor.execute("select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name+"';")
+    sql="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name+"';"
+    cursor.execute()
     column_names=corsor.fetchall()
     connection.close()
     return column_names;
@@ -42,12 +42,13 @@ def get_table_desc(tables):
 
 def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_password,number_of_mappers,split_column):
     print(s3_bucket_path)
+    pdb.set_trace()
     l_column_names=lower_table_column_names(table)
     print(l_column_names)
     destroy_s3_bucket(s3_bucket_path) 
 
     
-    query = "SELECT "+(', '.join(l_column_names))+" FROM "+table+"  where $CONDITIONS"
+    query = "select "+(', '.join(l_column_names))+" FROM "+table+"  where $CONDITIONS"
     print(query)
     if(number_of_mappers>1):
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url +" --username "+ src_username+" --password " + src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m "+str(number_of_mappers) + " --split-by t."+split_column
@@ -82,9 +83,10 @@ def sync_data(args):
     else:
         pool = Pool(args.degree_of_parallelism)
 
-    table_desc_list = get_table_desc(args.tables)
-    sub_process=partial(process, args)
-    pool.map(sub_process, table_desc_list)
+    process(args,'DimMktSource')
+    # table_desc_list = get_table_desc(args.tables)
+    # sub_process=partial(process, args)
+    # pool.map(sub_process, table_desc_list)
 
 
 if __name__ == '__main__':
