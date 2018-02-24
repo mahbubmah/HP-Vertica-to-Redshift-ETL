@@ -23,10 +23,11 @@ def create_db_connection(hostname,database,username,password,port):
             password = password,
             host = hostname,
             port = port)
+        return connection
     except:
         print ("unable to connect to database")
 
-    return connection
+    
 
 def store(trgt_db_conn,table,s3_bucket_path,aws_role_arn):
     cur = trgt_db_conn.cursor()
