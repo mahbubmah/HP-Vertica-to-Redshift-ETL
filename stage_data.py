@@ -23,8 +23,8 @@ def lower_table_column_names(table_name):
     connection=connect_vertica_db()
     cursor=connection.cursor()
     sql="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name+"';"
-    cursor.execute()
-    column_names=corsor.fetchall()
+    cursor.execute(sql)
+    column_names=cursor.fetchall()
     connection.close()
     return column_names;
 
