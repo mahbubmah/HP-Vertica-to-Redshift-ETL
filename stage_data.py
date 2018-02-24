@@ -42,7 +42,6 @@ def get_table_desc(tables):
 
 def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_password,number_of_mappers,split_column):
     print(s3_bucket_path)
-    pdb.set_trace()
     l_column_names=lower_table_column_names(table)
     print(l_column_names)
     destroy_s3_bucket(s3_bucket_path) 
