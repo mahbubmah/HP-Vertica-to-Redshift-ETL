@@ -12,7 +12,7 @@ import tempfile
 import boto3
 import ConfigParser
 import json
-
+import vertica_python
 
 def download_s3_data(source,dest):
     bucket_name = source.split('/')[2]
@@ -38,3 +38,9 @@ def read_config(path='config.json'):
 
     return config
 
+
+
+def connect_vertica_db():   
+    connection = vertica_python.connect(**conn_info)
+    conn_info = {'host': 'ec2-52-90-229-247.compute-1.amazonaws.com', 'port': 5433,'user': 'dbadmin','password': 'vfr45tgb', 'database': 'sabredb','read_timeout': 600,'unicode_error': 'strict','ssl': False,'connection_timeout': 5}
+    return connection
