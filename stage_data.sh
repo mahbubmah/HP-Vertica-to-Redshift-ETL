@@ -1,2 +1,2 @@
 source env/bin/activate
- python stage_data.py   --aws_role_arn "arn:aws:iam::324827999179:role/myRedshiftRole"   --src_driver "com.vertica.jdbc.Driver"   --src_db_url "jdbc:vertica://172.31.29.108/sabredb"   --src_username "dbadmin"   --src_password "vfr45tgb"   --tables "DimMktSource"   --target_s3_path "s3://ash.data/vertica/02-13" --degree_of_parallelism 1 --number_of_mappers 1
+ python stage_data.py   --aws_role_arn "arn:aws:iam::324827999179:role/myRedshiftRole"   --src_driver "com.vertica.jdbc.Driver"   --src_db_url "jdbc:vertica://172.31.29.108/sabredb"   --src_username "dbadmin"   --src_password "vfr45tgb"   --tables "store.store_dimension"   --target_s3_path "s3://ash.data/vertica/02-13" --degree_of_parallelism 1 --number_of_mappers 1

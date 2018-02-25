@@ -22,7 +22,21 @@ def destroy_s3_bucket(s3_bucket_path):
 def lower_table_column_names(table_name):
     connection=connect_vertica_db()
     cursor=connection.cursor()
-    sql="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name+"';"
+    table_name_with_schema=[]
+    table_name_only=table_name
+    table_schema=''
+    sql=''
+    sql_schema_condition=''
+    if '.' in table_name:
+        table_name_with_schema=table_name.split('.')
+        table_name_only=table_name_with_schema[1]
+        table_schema=table_name_with_schema[0]
+        sql_schema_condition+=" and t.table_schema='"+table_schema+"'"
+    
+    sql+="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name_only+"' "+sql_schema_condition+";"
+    
+        
+
     cursor.execute(sql)
     column_names=cursor.fetchall()
     connection.close()
