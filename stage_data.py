@@ -34,7 +34,7 @@ def lower_table_column_names(table_name):
         sql_schema_condition+=" and t.table_schema='"+table_schema+"'"
     
     sql+="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name_only+"' "+sql_schema_condition+";"
-    
+    print(sql)
         
 
     cursor.execute(sql)
