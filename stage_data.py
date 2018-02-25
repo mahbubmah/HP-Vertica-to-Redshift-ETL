@@ -67,10 +67,10 @@ def process(args,table_desc):
         number_of_mappers=1
 
     s3_bucket_path = args.target_s3_path +"/"+table+"/"
-    try:
-        stage_src_data(table,s3_bucket_path,args.src_driver,args.src_db_url,args.src_username,args.src_password,number_of_mappers,split_column)
-    except:
-        print("ERROR PROCESSING TABLE : "+table)
+    #try:
+    stage_src_data(table,s3_bucket_path,args.src_driver,args.src_db_url,args.src_username,args.src_password,number_of_mappers,split_column)
+    #except:
+    #    print("ERROR PROCESSING TABLE : "+table)
 
 
 def sync_data(args):
