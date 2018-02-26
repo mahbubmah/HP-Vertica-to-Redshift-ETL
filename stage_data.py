@@ -13,7 +13,7 @@ import json
 from utill import download_s3_data, memoize
 
 @memoize
-def ssm_pass(args):
+def ssm_pass():
     out = subprocess.Popen('aws ssm get-parameters --names "'+args.ssm_name+'" --with-decryption',stdout=subprocess.PIPE,shell=True)
     params = json.loads(out.stdout.read())
     return params['Value']
