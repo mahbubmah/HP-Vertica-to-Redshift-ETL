@@ -48,9 +48,10 @@ def lower_table_column_names(table_name):
         table_name_with_schema=table_name.split('.')
         table_name_only=table_name_with_schema[1]
         table_schema=table_name_with_schema[0]
-        sql_schema_condition+=" and t.table_schema='"+table_schema+"'"
-    
-    sql+="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name_only+"' "+sql_schema_condition+";"
+        sql_schema_condition+=" and t.table_schema='"+table_schema+"'"   
+
+
+    sql+="select lower(column_name) l_column_name, lower(data_type) data_type from v_catalog.columns t  where t.table_name='"+table_name_only+"' "+sql_schema_condition+";"
     print(sql)
 
     cursor.execute(sql)
@@ -75,8 +76,8 @@ def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_p
     l_column_names=lower_table_column_names(table)
     print(l_column_names)
     destroy_s3_bucket(s3_bucket_path) 
-    
-    query = "select "+(', '.join(str(v[0]) for v in l_column_names))+" FROM "+table+"  where $CONDITIONS"
+    select_str=', '.join('cast(to_hex('+str(v[0])+') as varchar) '+str(v[0]) if 'binary' in v[1] else str(v[0])  for v in l_column_names)
+    query = "select "+select_str+" FROM "+table+"  where $CONDITIONS"
     print(query)
     if(number_of_mappers>1):
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url +" --username "+ src_username+" --password " + src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m "+str(number_of_mappers) + " --split-by t."+split_column
