@@ -40,7 +40,7 @@ def lower_table_column_names(table_name):
     cursor.execute(sql)
     column_names=cursor.fetchall()
     connection.close()
-    return column_names;
+    return column_names
 
 def get_table_desc(tables):
     if(tables.startswith("s3")):
