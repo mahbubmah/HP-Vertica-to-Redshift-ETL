@@ -85,8 +85,9 @@ def _process(args,table_line):
         number_of_mappers=1
 
     s3_bucket_path = args.target_s3_path +"/"+table+"/"
+    src_db_url = "jdbc:vertica://"+args.host+"/"+args.db_name
     #try:
-    stage_src_data(table,s3_bucket_path,args.src_driver,args.src_db_url,args.username,args.password,number_of_mappers,split_column)
+    stage_src_data(table,s3_bucket_path,args.src_driver,src_db_url,args.username,args.password,number_of_mappers,split_column)
     #except:
     #    print("ERROR PROCESSING TABLE : "+table)
 
@@ -100,7 +101,6 @@ def sync_data(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='data transfer')
     parser.add_argument('--src_driver', action="store", dest="src_driver", required=True)
-    parser.add_argument('--src_db_url', action="store", dest="src_db_url", required=True)
     parser.add_argument('--host', action="store", required=True)
     parser.add_argument('--port', action="store",type=int, required=False, default=5433)
     parser.add_argument('-U', '--username', action="store", required=True)
