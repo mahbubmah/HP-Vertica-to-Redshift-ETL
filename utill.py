@@ -37,11 +37,3 @@ def read_config(path='config.json'):
         config=json.load(f)
 
     return config
-
-
-
-def connect_vertica_db():   
-    
-    conn_info = {'host': 'ec2-52-90-229-247.compute-1.amazonaws.com', 'port': 5433,'user': 'dbadmin','password': 'vfr45tgb', 'database': 'sabredb','read_timeout': 600,'unicode_error': 'strict','ssl': False,'connection_timeout': 5}
-    connection = vertica_python.connect(**conn_info)
-    return connection

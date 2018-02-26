@@ -4,16 +4,22 @@ sys.path.append('./env/lib64/python2.7/site-packages/')
 import argparse
 import subprocess
 import psycopg2
-import multiprocessing
-from functools import partial
-from multiprocessing import Pool
+import vertica_python
 import os
 import pdb
 import shlex
-import shutil
-import tempfile
 import boto3
-from utill import *
+from utill import download_s3_data
+
+def connect_vertica_db(args):   
+    host = args.host
+    port = args.port
+    username = args.username
+    password = args.password
+    db = args.db_name
+    conn_info = {'host': host, 'port': port,'user': username,'password': password, 'database': db,'read_timeout': 600,'unicode_error': 'strict','ssl': False,'connection_timeout': 5}
+    connection = vertica_python.connect(**conn_info)
+    return connection
 
 def destroy_s3_bucket(s3_bucket_path):
     command = "aws s3 rm "+s3_bucket_path+" --recursive"
@@ -35,22 +41,21 @@ def lower_table_column_names(table_name):
     
     sql+="select lower(column_name) l_column_name from v_catalog.columns t  where t.table_name='"+table_name_only+"' "+sql_schema_condition+";"
     print(sql)
-        
 
     cursor.execute(sql)
     column_names=cursor.fetchall()
     connection.close()
     return column_names
 
-def get_table_desc(tables):
-    if(tables.startswith("s3")):
-        download_s3_data(tables,os.getcwd())
-        file_name = tables.split("/")[-1]
+def get_table_name_list(table_src):
+    if(table_src.startswith("s3")):
+        download_s3_data(table_src,os.getcwd())
+        file_name = table_src.split("/")[-1]
         table_file = open(file_name,'r')
         list_table = list(table_file)
         table_file.close()
     else:
-        list_table= tables.split(",")
+        list_table= table_src.split(",")
 
     return list_table
 
@@ -59,7 +64,6 @@ def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_p
     l_column_names=lower_table_column_names(table)
     print(l_column_names)
     destroy_s3_bucket(s3_bucket_path) 
-
     
     query = "select "+(', '.join(str(v[0]) for v in l_column_names))+" FROM "+table+"  where $CONDITIONS"
     print(query)
@@ -69,13 +73,13 @@ def stage_src_data(table,s3_bucket_path,src_driver,src_db_url,src_username,src_p
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url +" --username "+ src_username+" --password " + src_password +   " --query '"+ query +"' --target-dir "+ s3_bucket_path +" --direct --as-avrodatafile -m 1"
     subprocess.call(cmd_dump_to_s3,shell=True)
 
-def process(args,table_desc):
-    table_desc = table_desc.strip()
+def _process(args,table_line):
+    table_line = table_line.strip()
     split_column =""
-    table_desc = table_desc.split(" ")
-    table = table_desc[0]
-    if(len(table_desc)>1):
-        split_column = table_desc[1]
+    table_line = table_line.split(" ")
+    table = table_line[0]
+    if(len(table_line)>1):
+        split_column = table_line[1]
         number_of_mappers=args.number_of_mappers
     else:
         number_of_mappers=1
@@ -88,34 +92,23 @@ def process(args,table_desc):
 
 
 def sync_data(args):
-    max_process= multiprocessing.cpu_count()
-    if(max_process<=args.degree_of_parallelism):
-        pool = Pool(max_process)
-    elif(args.degree_of_parallelism<=0):
-        pool = Pool(1)
-    else:
-        pool = Pool(args.degree_of_parallelism)
-
-    # process(args,'DimMktSource')
-    table_desc_list = get_table_desc(args.tables)
-    sub_process=partial(process, args)
-    pool.map(sub_process, table_desc_list)
+    table_name_list = get_table_name_list(args.tables)
+    for table_line in table_name_list:
+        _process(args, table_line)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='data transfer')
-    parser.add_argument('--aws_role_arn', action="store", dest="aws_role_arn", required=True)
-
-    parser.add_argument('--target_s3_path', action="store", dest="target_s3_path", required=True)
-    parser.add_argument('--tables', action="store", dest="tables", required=False)
     parser.add_argument('--src_driver', action="store", dest="src_driver", required=True)
     parser.add_argument('--src_db_url', action="store", dest="src_db_url", required=True)
-    parser.add_argument('--src_username', action="store", dest="src_username", required=True)
-    parser.add_argument('--src_password', action="store", dest="src_password", required=True)
-
-
-    parser.add_argument('--degree_of_parallelism', action="store", dest="degree_of_parallelism", type=int, default=1)
-    parser.add_argument('--number_of_mappers', action="store", dest="number_of_mappers", type=int, default=1)
+    parser.add_argument('-h', '--host', action="store", required=True)
+    parser.add_argument('-p', '--port', action="store",type=int required=False, default=5433)
+    parser.add_argument('-U', '--username', action="store", required=True)
+    parser.add_argument('-P', '--password', action="store", required=True)
+    parser.add_argument('-d', '--db_name', action="store", required=True)
+    parser.add_argument('-t', '--tables', action="store", required=False)
+    parser.add_argument('-m', '--number_of_mappers', action="store", type=int, default=1)
+    parser.add_argument('-T', '--target_s3_path', action="store", required=True)
 
     args = parser.parse_args()
     sync_data(args)
