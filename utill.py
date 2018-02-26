@@ -12,6 +12,7 @@ import tempfile
 import boto3
 import ConfigParser
 import json
+from functools import wraps
 import vertica_python
 
 def download_s3_data(source,dest):
@@ -37,3 +38,15 @@ def read_config(path='config.json'):
         config=json.load(f)
 
     return config
+
+def memoize(function):
+    memo = {}
+    @wraps(function)
+    def wrapper(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            rv = function(*args)
+            memo[args] = rv
+            return rv
+    return wrapper

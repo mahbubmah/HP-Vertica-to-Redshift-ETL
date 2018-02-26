@@ -9,13 +9,23 @@ import os
 import pdb
 import shlex
 import boto3
-from utill import download_s3_data
+import json
+from utill import download_s3_data, memoize
+
+@memoize
+def ssm_pass(args):
+    out = subprocess.Popen('aws ssm get-parameters --names "'+args.ssm_name+'" --with-decryption',stdout=subprocess.PIPE,shell=True)
+    params = json.loads(out.stdout.read())
+    return params['Value']
+
 
 def connect_vertica_db(args):   
     host = args.host
     port = args.port
     username = args.username
     password = args.password
+    if not password:
+        password = ssm_pass()
     db = args.db_name
     conn_info = {'host': host, 'port': port,'user': username,'password': password, 'database': db,'read_timeout': 600,'unicode_error': 'strict','ssl': False,'connection_timeout': 5}
     connection = vertica_python.connect(**conn_info)
@@ -86,8 +96,11 @@ def _process(args,table_line):
 
     s3_bucket_path = args.target_s3_path +"/"+table+"/"
     src_db_url = "jdbc:vertica://"+args.host+"/"+args.db_name
+    password = args.password
+    if not password:
+        password = ssm_pass()
     #try:
-    stage_src_data(table,s3_bucket_path,args.src_driver,src_db_url,args.username,args.password,number_of_mappers,split_column)
+    stage_src_data(table,s3_bucket_path,args.src_driver,src_db_url,args.username,password,number_of_mappers,split_column)
     #except:
     #    print("ERROR PROCESSING TABLE : "+table)
 
@@ -100,11 +113,16 @@ def sync_data(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='data transfer')
+    pass_grp = parser.add_mutually_exclusive_group(required=True)
+    pass_grp.add_argument('-P', '--password', action="store")
+    pass_grp.add_argument('--ssm_name', action="store")
+
     parser.add_argument('--src_driver', action="store", dest="src_driver", required=True)
     parser.add_argument('--host', action="store", required=True)
     parser.add_argument('--port', action="store",type=int, required=False, default=5433)
     parser.add_argument('-U', '--username', action="store", required=True)
-    parser.add_argument('-P', '--password', action="store", required=True)
+    # parser.add_argument('-P', '--password', action="store", required=False)
+    # parser.add_argument('--ssm_name', action="store", required=False)
     parser.add_argument('-d', '--db_name', action="store", required=True)
     parser.add_argument('-t', '--tables', action="store", required=False)
     parser.add_argument('-m', '--number_of_mappers', action="store", type=int, default=1)
