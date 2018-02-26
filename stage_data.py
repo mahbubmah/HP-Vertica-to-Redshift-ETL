@@ -122,8 +122,6 @@ if __name__ == '__main__':
     parser.add_argument('--host', action="store", required=True)
     parser.add_argument('--port', action="store",type=int, required=False, default=5433)
     parser.add_argument('-U', '--username', action="store", required=True)
-    # parser.add_argument('-P', '--password', action="store", required=False)
-    # parser.add_argument('--ssm_name', action="store", required=False)
     parser.add_argument('-d', '--db_name', action="store", required=True)
     parser.add_argument('-t', '--tables', action="store", required=False)
     parser.add_argument('-m', '--number_of_mappers', action="store", type=int, default=1)
