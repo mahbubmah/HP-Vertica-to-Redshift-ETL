@@ -101,7 +101,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='data transfer')
     parser.add_argument('--src_driver', action="store", dest="src_driver", required=True)
     parser.add_argument('--src_db_url', action="store", dest="src_db_url", required=True)
-    parser.add_argument('-h', '--host', action="store", required=True)
+    parser.add_argument('--host', action="store", required=True)
     parser.add_argument('-p', '--port', action="store",type=int, required=False, default=5433)
     parser.add_argument('-U', '--username', action="store", required=True)
     parser.add_argument('-P', '--password', action="store", required=True)
