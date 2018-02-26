@@ -16,7 +16,8 @@ from utill import download_s3_data, memoize
 def ssm_pass():
     out = subprocess.Popen('aws ssm get-parameters --names "'+args.ssm_name+'" --with-decryption',stdout=subprocess.PIPE,shell=True)
     params = json.loads(out.stdout.read())
-    return params['Value']
+    # taking first or last version only
+    return params['Parameters'][0]['Value']
 
 
 def connect_vertica_db(args):   
