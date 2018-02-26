@@ -26,7 +26,7 @@ def destroy_s3_bucket(s3_bucket_path):
     subprocess.call(command,shell=True)
 
 def lower_table_column_names(table_name):
-    connection=connect_vertica_db()
+    connection=connect_vertica_db(args)
     cursor=connection.cursor()
     table_name_with_schema=[]
     table_name_only=table_name
