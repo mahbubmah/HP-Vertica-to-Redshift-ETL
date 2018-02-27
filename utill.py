@@ -13,7 +13,7 @@ import boto3
 import ConfigParser
 import json
 from functools import wraps
-import vertica_python
+# import vertica_python
 
 def download_s3_data(source,dest):
     bucket_name = source.split('/')[2]
