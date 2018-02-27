@@ -30,7 +30,7 @@ def download_s3_data(source,dest):
             dest + os.sep + file_name)
 
 
-def read_config(path='config.json',profile):
+def read_config(path='config.json',profile="DEV"):
     with open(path,'r') as f:
         config=json.load(f)
 
