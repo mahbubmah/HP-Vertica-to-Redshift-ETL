@@ -13,7 +13,6 @@ import boto3
 import ConfigParser
 import json
 from functools import wraps
-# import vertica_python
 
 def download_s3_data(source,dest):
     bucket_name = source.split('/')[2]
@@ -31,13 +30,11 @@ def download_s3_data(source,dest):
             dest + os.sep + file_name)
 
 
-def read_config(path='config.json'):
-    config=ConfigParser.ConfigParser()
-
+def read_config(path='config.json',profile):
     with open(path,'r') as f:
         config=json.load(f)
 
-    return config
+    return config[profile]
 
 def memoize(function):
     memo = {}

@@ -11,6 +11,7 @@ import shlex
 import boto3
 import json
 from utill import download_s3_data, memoize, read_config
+import os
 
 @memoize
 def ssm_pass():
@@ -19,9 +20,10 @@ def ssm_pass():
     # taking first or last version only
     return params['Parameters'][0]['Value']
 
-
+@memoize
 def read_params():
-    config = read_config()
+    profile =  os.environ['MACHINE_ENV']
+    config = read_config(profile=profile)
     params = {}
     params['password']= config['source_db']['password']
     params['ssm_name']= config['source_db']['ssm_name']
