@@ -12,8 +12,7 @@
       "port": 5433,
       "db_name": "sabredb",
       "tables": "DimMktSource",
-      "username": "dbadmin",
-      "db_url": "jdbc:vertica://172.31.29.108/sabredb"
+      "username": "dbadmin"
     },
     "tables": [
       {
@@ -36,8 +35,7 @@
       "host": "10.0.2.114",
       "port": 5433,
       "db_name": "uav01d1",
-      "username": "dbadmin",
-      "db_url": "jdbc:vertica://172.31.29.108/sabredb"
+      "username": "dbadmin"
     },
     "tables": [
       {
