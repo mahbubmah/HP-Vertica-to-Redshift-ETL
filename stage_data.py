@@ -37,7 +37,7 @@ def read_params(logger):
         logger.info("Source Host - "+params['host'])
 
         params['port'] = config['source_db']['port']
-        logger.info("Source port - "+params['port'])
+        logger.info("Source port - "+str(params['port']))
 
         params['username'] = config['source_db']['username']
         logger.info("Source username - "+params['username'])
@@ -158,7 +158,7 @@ def _process(params, table):
             schema = ''
         split_column = table['split_column']
 
-        if split_column=='':
+        if split_column is None:
             logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
 
         s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
