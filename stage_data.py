@@ -23,7 +23,7 @@ def read_params(logger):
     try:
         logger.info('Starting reading configuration....')
         profile='DEV'
-        if 'MACHINE_ENV' in os.environ
+        if 'MACHINE_ENV' in os.environ:
             profile = os.environ['MACHINE_ENV']
         config = read_config(profile=profile)
         params = {}
