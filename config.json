@@ -13,9 +13,7 @@
     "port" : 5433,
     "db_name" : "sabredb",
     "tables" : "DimMktSource",
-
     "username": "dbadmin",
-    
     "db_url": "jdbc:vertica://172.31.29.108/sabredb"
   },
   "target_db": {
@@ -31,7 +29,20 @@
       {
         "schema":"",
         "name": "DimMktSource",
-        "keys": null
+        "split_column": null,
+        "mappers": 1
+      },
+      {
+        "schema":"",
+        "name": "customer_dimension",
+        "split_column": null,
+        "mappers": 1
+      },
+      {
+        "schema":"",
+        "name": "employee_dimension",
+        "split_column": null,
+        "mappers": 1
       }
     ]
   }
@@ -39,7 +50,7 @@
 "STAGE": {
   "aws": {
     "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
-    "s3_path": "s3://ash.data/vertica/02-13",
+    "s3_path": "s3://ash.data/vertica/20180227",
     "number_of_mappers": 1
   },
   "source_db": {
@@ -50,9 +61,7 @@
     "port" : 5433,
     "db_name" : "sabredb",
     "tables" : "DimMktSource",
-
     "username": "dbadmin",
-    
     "db_url": "jdbc:vertica://172.31.29.108/sabredb"
   },
   "target_db": {
@@ -68,7 +77,20 @@
       {
         "schema":"",
         "name": "DimMktSource",
-        "keys": null
+        "split_column": null,
+        "mappers": 1
+      },
+      {
+        "schema":"",
+        "name": "customer_dimension",
+        "split_column": null,
+        "mappers": 1
+      },
+      {
+        "schema":"",
+        "name": "employee_dimension",
+        "split_column": null,
+        "mappers": 1
       }
     ]
   }
@@ -76,7 +98,7 @@
 "PROD": {
   "aws": {
     "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
-    "s3_path": "s3://ash.data/vertica/02-13",
+    "s3_path": "s3://ash.data/vertica/20180227",
     "number_of_mappers": 1
   },
   "source_db": {
@@ -87,9 +109,7 @@
     "port" : 5433,
     "db_name" : "sabredb",
     "tables" : "DimMktSource",
-
     "username": "dbadmin",
-    
     "db_url": "jdbc:vertica://172.31.29.108/sabredb"
   },
   "target_db": {
@@ -105,7 +125,20 @@
       {
         "schema":"",
         "name": "DimMktSource",
-        "keys": null
+        "split_column": null,
+        "mappers": 1
+      },
+      {
+        "schema":"",
+        "name": "customer_dimension",
+        "split_column": null,
+        "mappers": 1
+      },
+      {
+        "schema":"",
+        "name": "employee_dimension",
+        "split_column": null,
+        "mappers": 1
       }
     ]
   }
