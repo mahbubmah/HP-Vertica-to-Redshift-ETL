@@ -55,7 +55,6 @@ def read_params(logger):
 
     except Exception as e:
         logger.exception("Config file couldn't load")
-        raise
     
 
 def connect_vertica_db(logger,params):
@@ -69,12 +68,11 @@ def connect_vertica_db(logger,params):
         db = params['db_name']
         conn_info = {'host': host, 'port': port, 'user': username, 'password': password, 'database': db,
                      'read_timeout': 600, 'unicode_error': 'strict', 'ssl': False, 'connection_timeout': 5}
-        logger.debug('Verticat db connection info: \n'+conn_info)
+        
         connection = vertica_python.connect(**conn_info)
         return connection
     except Exception as e:
         logger.exception("Can't connect to vertica database.")
-        raise
 
 
 def destroy_s3_bucket(s3_bucket_path):
@@ -107,7 +105,6 @@ def lower_table_column_names(logger,table_name):
         return column_names
     except Exception as e:
         logger.exception("Couldn't read table column name")
-        raise
 
 
 def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column):
@@ -136,7 +133,6 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
         logger.info('Sqoop job finished.')
     except Exception as e:
         logger.exception("Sqoop job process step error.")
-        raise
 
 
 def _process(params, table):
@@ -178,7 +174,6 @@ def _process(params, table):
         logger.info('Total time taken - '+str(round(process_end_time - process_start_time, 2))+' sec.')
     except Exception as e:
         logger.exception("Couldn't start process.")
-        raise
     
 
 
@@ -194,4 +189,3 @@ if __name__ == '__main__':
         sync_data(params)
     except Exception as e:
         logger.exception("Couldn't start process.")
-        raise
