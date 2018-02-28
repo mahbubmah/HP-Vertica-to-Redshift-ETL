@@ -85,6 +85,8 @@ def stage_src_data(schema,table, s3_bucket_path, src_driver, src_db_url, src_use
     select_str = ', '.join(
         'cast(to_hex(' + str(v[0]) + ') as varchar) ' + str(v[0]) if 'binary' in v[1] else str(v[0]) for v in
         l_column_names)
+    if schema:
+        table = schema + "." + table
     query = "select " + select_str + " FROM " + table + " t where $CONDITIONS"
     print(query)
     if (number_of_mappers > 1):
