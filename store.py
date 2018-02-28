@@ -4,7 +4,6 @@ sys.path.append('./env/lib64/python2.7/site-packages/')
 import psycopg2
 import os
 from utill import *
-from utill import memoize, read_config
 
 
 @memoize
@@ -22,7 +21,6 @@ def read_params():
     params = {}
     params['password'] = config['target_db']['password']
     params['ssm_name'] = config['target_db']['ssm_name']
-    params['src_driver'] = config['target_db']['driver']
     params['host'] = config['target_db']['host']
     params['port'] = config['target_db']['port']
     params['username'] = config['target_db']['username']
@@ -76,7 +74,7 @@ def _process(params,table):
     if not password:
         password = ssm_pass()
 
-    connection = create_db_connection(params['host'] , params['db_name'], params['username'],password,params['password'])
+    connection = create_db_connection(params['host'] , params['db_name'], params['username'],password,params['port'])
 
     try:
        store(connection,table_name,s3_bucket_path,params['role_arn'])
