@@ -97,7 +97,7 @@ def lower_table_column_names(logger,table_name):
 
         sql += "select lower(column_name) l_column_name, lower(data_type) data_type from v_catalog.columns t  where t.table_name='" + table_name_only + "' " + sql_schema_condition + ";"
         # print(sql)
-        logger.info('Query for select column: \n'+sql)
+        logger.info('Query for select column: \n\n'+sql+'\n')
 
         cursor.execute(sql)
         column_names = cursor.fetchall()
@@ -118,17 +118,17 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
         if schema:
             table = schema + "." + table
         query = "select " + select_str + " FROM " + table + " t where $CONDITIONS"
-        logger.debug(' Sqoop job query: \n'+query)
+        logger.debug(' Sqoop job query: \n\n'+query+'\n')
         if (number_of_mappers > 1):
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m " + str(
                 number_of_mappers) + " --split-by t." + split_column + " -- --schema "+schema
         else:
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m 1" + " -- --schema "+schema
         
-        logger.debug('Sqoop job command: \n'+cmd_dump_to_s3)
+        logger.debug('Sqoop job command: \n\n'+cmd_dump_to_s3+'\n')
         logger.info('Sqoop job starting...')
-        sq_p=subprocess.call(cmd_dump_to_s3,stdout=subprocess.PIPE, shell=True)
-        logger.debug('Sqoop job output: \n'+sq_p.stdout.read())
+        sq_p=subprocess.Popen(cmd_dump_to_s3,stdout=subprocess.PIPE, shell=True)
+        logger.debug('Sqoop job output: \n\n'+sq_p.stdout.read()+'\n')
         logger.info('Sqoop job finished.')
     except Exception as e:
         logger.exception("Sqoop job process step error.")
