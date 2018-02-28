@@ -17,7 +17,7 @@
     "target_db": {
       "password": "Vfr45tgb",
       "ssm_name": "vertica-pw",
-      "host": "'rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
+      "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
       "port": 5439,
       "db_name": "qsdata",
       "tables": "DimMktSource",
