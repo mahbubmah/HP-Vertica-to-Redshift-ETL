@@ -22,7 +22,9 @@ def ssm_pass():
 def read_params(logger):
     try:
         logger.info('Starting reading configuration....')
-        profile = os.environ['MACHINE_ENV']
+        profile='DEV'
+        if 'MACHINE_ENV' in os.environ
+            profile = os.environ['MACHINE_ENV']
         config = read_config(profile=profile)
         params = {}
         params['password'] = config['source_db']['password']
