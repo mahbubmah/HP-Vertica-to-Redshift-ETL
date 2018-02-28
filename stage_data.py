@@ -7,7 +7,7 @@ import vertica_python
 import json
 from utill import memoize, read_config
 import os
-from utill import *
+from logger import *
 
 @memoize
 def ssm_pass():
