@@ -1,19 +1,37 @@
 import sys
 sys.path.append('./env/lib/python2.7/site-packages/')
 sys.path.append('./env/lib64/python2.7/site-packages/')
-import argparse
-import subprocess
 import psycopg2
-import multiprocessing
-from functools import partial
-from multiprocessing import Pool
 import os
-import pdb
-import shlex
-import shutil
-import tempfile
-import boto3
 from utill import *
+from utill import memoize, read_config
+
+
+@memoize
+def ssm_pass():
+    out = subprocess.Popen('aws ssm get-parameters --names "' + params['ssm_name'] + '" --with-decryption',
+                           stdout=subprocess.PIPE, shell=True)
+    params = json.loads(out.stdout.read())
+    # taking first or last version only
+    return params['Parameters'][0]['Value']
+
+@memoize
+def read_params():
+    profile = os.environ['MACHINE_ENV']
+    config = read_config(profile=profile)
+    params = {}
+    params['password'] = config['target_db']['password']
+    params['ssm_name'] = config['target_db']['ssm_name']
+    params['src_driver'] = config['target_db']['driver']
+    params['host'] = config['target_db']['host']
+    params['port'] = config['target_db']['port']
+    params['username'] = config['target_db']['username']
+    params['db_name'] = config['target_db']['db_name']
+    params['tables'] = config['tables']
+    params['target_s3_path'] = config['aws']['s3_path']
+    params['role_arn'] = config['aws']['role_arn']
+
+    return params
 
 def create_db_connection(hostname,database,username,password,port):
     try:
@@ -26,8 +44,6 @@ def create_db_connection(hostname,database,username,password,port):
         return connection
     except:
         print ("unable to connect to database")
-
-    
 
 def store(trgt_db_conn,table,s3_bucket_path,aws_role_arn):
     cur = trgt_db_conn.cursor()
@@ -51,46 +67,27 @@ def get_table_desc(tables):
 
     return list_table
 
-def process(args,table_desc):
-    table_desc = table_desc.strip()
-    table_desc = table_desc.split(" ")
-    table = table_desc[0]
+def _process(params,table):
+    table_name = table['name']
 
-    trgt_db_conn = create_db_connection(args.trgt_db_host,args.trgt_db_name,args.trgt_username,args.trgt_password,args.trgt_port)
-    s3_bucket_path = args.target_s3_path +"/"+table
+    s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
+    src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']
+    password = params['password']
+    if not password:
+        password = ssm_pass()
+
+    connection = create_db_connection(params['host'] , params['db_name'], params['username'],password,params['password'])
+
     try:
-       store(trgt_db_conn,table,s3_bucket_path,args.aws_role_arn)
+       store(connection,table,s3_bucket_path,params['role_arn'])
     except:
        print("ERROR PROCESSING TABLE : "+table)
 
-def store_data(args):
-    max_process= multiprocessing.cpu_count()
-    if(max_process<=args.degree_of_parallelism):
-        pool = Pool(max_process)
-    elif(args.degree_of_parallelism<=0):
-        pool = Pool(1)
-    else:
-        pool = Pool(args.degree_of_parallelism)
-
-    table_desc_list = get_table_desc(args.tables)
-    sub_process=partial(process, args)
-    pool.map(sub_process, table_desc_list)
+def store_data(params):
+    for table in params['tables']['name']:
+        _process(params, table)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='data transfer')
-    parser.add_argument('--aws_role_arn', action="store", dest="aws_role_arn", required=True)
-
-    parser.add_argument('--target_s3_path', action="store", dest="target_s3_path", required=True)
-    parser.add_argument('--tables', action="store", dest="tables", required=False)
-
-
-    parser.add_argument('--trgt_db_host', action="store", dest="trgt_db_host", required=True)
-    parser.add_argument('--trgt_db_name', action="store", dest="trgt_db_name", required=True)
-    parser.add_argument('--trgt_username', action="store", dest="trgt_username", required=True)
-    parser.add_argument('--trgt_password', action="store", dest="trgt_password", required=True)
-    parser.add_argument('--trgt_port', action="store", dest="trgt_port", required=True)
-    parser.add_argument('--degree_of_parallelism', action="store", dest="degree_of_parallelism", type=int, default=1)
-
-    args = parser.parse_args()
-    store_data(args)
+    params = read_params()
+    store_data(params)

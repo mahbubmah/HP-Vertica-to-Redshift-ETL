@@ -1,16 +1,5 @@
-import argparse
-import subprocess
-import psycopg2
-import multiprocessing
-from functools import partial
-from multiprocessing import Pool
 import os
-import pdb
-import shlex
-import shutil
-import tempfile
 import boto3
-import ConfigParser
 import json
 from functools import wraps
 

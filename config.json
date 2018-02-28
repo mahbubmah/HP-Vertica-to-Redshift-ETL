@@ -14,6 +14,16 @@
       "tables": "DimMktSource",
       "username": "dbadmin"
     },
+    "target_db": {
+      "password": "Vfr45tgb",
+      "ssm_name": "vertica-pw",
+      "driver": "com.vertica.jdbc.Driver",
+      "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
+      "port": 5433,
+      "db_name": "qsdata",
+      "tables": "DimMktSource",
+      "username": "admin"
+    },
     "tables": [
       {
         "schema": "public",
@@ -36,6 +46,16 @@
       "port": 5433,
       "db_name": "uav01d1",
       "username": "dbadmin"
+    },
+    "target_db": {
+      "password": "Vfr45tgb",
+      "ssm_name": "vertica-pw",
+      "driver": "com.vertica.jdbc.Driver",
+      "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
+      "port": 5439,
+      "db_name": "qsdata",
+      "tables": "DimMktSource",
+      "username": "admin"
     },
     "tables": [
       {

@@ -1,1 +1,6 @@
-source env/bin/activate && python store.py --aws_role_arn "arn:aws:iam::324827999179:role/myRedshiftRole"   --tables "DimMktSource"   --target_s3_path "s3://ash.data/vertica/02-13"   --trgt_db_host "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com"   --trgt_db_name "qsdata"   --trgt_username "admin"   --trgt_password "Vfr45tgb"   --trgt_port "5439" --degree_of_parallelism 1
+#!/usr/bin/env bash
+#export MACHINE_ENV=STAGE
+#export MACHINE_ENV=DEV
+#export MACHINE_ENV=PROD
+source env/bin/activate
+python store.py
