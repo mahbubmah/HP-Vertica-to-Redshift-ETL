@@ -98,7 +98,10 @@ def stage_src_data(schema,table, s3_bucket_path, src_driver, src_db_url, src_use
 def _process(params, table):
     table_name = table['name']
     number_of_mappers = table['mappers']
-    schema = table['schema']
+    if table['schema']:
+        schema = table['schema']
+    else:
+        schema = ''
     split_column = table['split_column']
 
     s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"

@@ -15,17 +15,33 @@
       "username": "dbadmin",
       "db_url": "jdbc:vertica://172.31.29.108/sabredb"
     },
-    "target_db": {
-      "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
-      "port": "5439",
-      "db_name": "qsdata",
-      "username": "admin",
-      "password": "Vfr45tgb",
-      "is_encrypted_pw": false
-    },
     "tables": [
       {
         "schema": "public",
+        "name": "DimMktSource",
+        "split_column": null,
+        "mappers": 1
+      }
+    ]
+  },
+  "STAGE": {
+    "aws": {
+      "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
+      "s3_path": "s3://ash.data/vertica/20180228"
+    },
+    "source_db": {
+      "password": "vfr45tgb",
+      "ssm_name": "vertica-pw",
+      "driver": "com.vertica.jdbc.Driver",
+      "host": "10.0.2.114",
+      "port": 5433,
+      "db_name": "uav01d1",
+      "username": "dbadmin",
+      "db_url": "jdbc:vertica://172.31.29.108/sabredb"
+    },
+    "tables": [
+      {
+        "schema": "SHSCRSWHGSummary",
         "name": "DimMktSource",
         "split_column": null,
         "mappers": 1
