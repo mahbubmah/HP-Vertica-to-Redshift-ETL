@@ -79,12 +79,12 @@ def _process(params,table):
     connection = create_db_connection(params['host'] , params['db_name'], params['username'],password,params['password'])
 
     try:
-       store(connection,table,s3_bucket_path,params['role_arn'])
+       store(connection,table_name,s3_bucket_path,params['role_arn'])
     except:
-       print("ERROR PROCESSING TABLE : "+table)
+       print("ERROR PROCESSING TABLE : "+table_name)
 
 def store_data(params):
-    for table in params['tables']['name']:
+    for table in params['tables']:
         _process(params, table)
 
 

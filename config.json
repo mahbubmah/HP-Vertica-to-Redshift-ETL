@@ -19,7 +19,7 @@
       "ssm_name": "vertica-pw",
       "driver": "com.vertica.jdbc.Driver",
       "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
-      "port": 5433,
+      "port": 5439,
       "db_name": "qsdata",
       "tables": "DimMktSource",
       "username": "admin"
