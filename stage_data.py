@@ -8,6 +8,8 @@ import json
 from utill import memoize, read_config
 import os
 from logger import *
+from functools import partial
+from multiprocessing import Pool
 
 @memoize
 def ssm_pass():
