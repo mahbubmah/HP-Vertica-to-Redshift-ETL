@@ -49,6 +49,17 @@ def read_params(logger):
 
         params['target_s3_path'] = config['aws']['s3_path']
         logger.info("s3 bucket path - "+params['target_s3_path'])
+
+        max_process = multiprocessing.cpu_count()
+        if(max_process<=config['aws']['degree_of_parallelism']  or config['aws']['degree_of_parallelism'] <0):
+            logger.info ("Setting degree of parallelism to cpu count "+ str(max_process))
+            params['degree_of_parallelism'] = max_process
+            # print('Maximun '+str(max_process)+' process using...')
+        else:
+            params['degree_of_parallelism']= config['aws']['degree_of_parallelism']
+
+        logger.info("Degree of parallelism - "+params['degree_of_parallelism'])
+
         logger.info('Reading configuration successfully.')
 
         return params
@@ -56,7 +67,7 @@ def read_params(logger):
     except Exception as e:
         logger.exception("Config file couldn't load")
     
-
+@memoize
 def connect_vertica_db(logger,params):
     try:
         host = params['host']
@@ -177,8 +188,17 @@ def _process(params, table):
 
 
 def sync_data(params):    
-    for table in params['tables']:
-        _process(params, table)
+    # for table in params['tables']:
+    #     _process(params, table)
+    max_process= multiprocessing.cpu_count()
+    if(max_process<=params['degree_of_parallelism']  or params['degree_of_parallelism'] <0):
+        pool = Pool(max_process)
+        print('Maximun '+str(max_process)+' process using...')
+    else:
+        pool = Pool(params['degree_of_parallelism'] )
+
+    sub_process=partial(_process, params)
+    pool.map(sub_process, params['tables'])
     
 
 if __name__ == '__main__':
