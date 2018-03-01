@@ -4,7 +4,7 @@ sys.path.append('./env/lib64/python2.7/site-packages/')
 import psycopg2
 import os
 from utill import *
-
+from logger import *
 
 @memoize
 def ssm_pass():
@@ -15,19 +15,35 @@ def ssm_pass():
     return params['Parameters'][0]['Value']
 
 @memoize
-def read_params():
-    profile = os.environ['MACHINE_ENV']
-    config = read_config(profile=profile)
-    params = {}
-    params['password'] = config['target_db']['password']
-    params['ssm_name'] = config['target_db']['ssm_name']
-    params['host'] = config['target_db']['host']
-    params['port'] = config['target_db']['port']
-    params['username'] = config['target_db']['username']
-    params['db_name'] = config['target_db']['db_name']
-    params['tables'] = config['tables']
-    params['target_s3_path'] = config['aws']['s3_path']
-    params['role_arn'] = config['aws']['role_arn']
+def read_params(logger):
+    try:
+        profile = os.environ['MACHINE_ENV']
+        config = read_config(profile=profile)
+        params = {}
+        params['password'] = config['target_db']['password']
+        params['ssm_name'] = config['target_db']['ssm_name']
+
+        params['host'] = config['target_db']['host']
+        logger.info("Target host - "+params['host'])
+
+        params['port'] = config['target_db']['port']
+        logger.info("Target port - "+params['port'])
+
+        params['username'] = config['target_db']['username']
+        logger.info("Target username - "+params['username'])
+
+        params['db_name'] = config['target_db']['db_name']
+        logger.info("Target Database - "+params['db_name'])
+
+        params['tables'] = config['tables']
+        params['target_s3_path'] = config['aws']['s3_path']
+        logger.info("s3 bucket path - "+params['target_s3_path'])
+
+        params['role_arn'] = config['aws']['role_arn']
+
+        logger.info('Reading configuration successfully.')
+    except Exception as e:
+        logger.exception("Config file couldn't load")
 
     return params
 
@@ -87,5 +103,9 @@ def store_data(params):
 
 
 if __name__ == '__main__':
-    params = read_params()
-    store_data(params)
+    logger=jobLogger('root')
+    try:
+        params = read_params(logger)
+        store_data(params)
+    except Exception as e:
+        logger.exception("Couldn't start process.")
