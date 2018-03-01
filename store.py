@@ -6,6 +6,7 @@ import psycopg2
 import os
 from utill import *
 from logger import *
+import multiprocessing
 from functools import partial
 from multiprocessing import Pool
 
