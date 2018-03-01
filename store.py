@@ -49,11 +49,10 @@ def read_params(logger):
         if(max_process<=config['aws']['degree_of_parallelism']  or config['aws']['degree_of_parallelism'] <0):
             logger.info ("Setting degree of parallelism to cpu count "+ str(max_process))
             params['degree_of_parallelism'] = max_process
-            # print('Maximun '+str(max_process)+' process using...')
         else:
             params['degree_of_parallelism']= config['aws']['degree_of_parallelism']
 
-        logger.info("Degree of parallelism - "+params['degree_of_parallelism'])
+        logger.info("Degree of parallelism - "+ str(params['degree_of_parallelism']))
 
         logger.info('Reading configuration successfully.')
     except Exception as e:
@@ -139,6 +138,6 @@ if __name__ == '__main__':
     logger=jobLogger('root')
     try:
         params = read_params(logger)
-        store_data(params)
+        # store_data(params)
     except Exception as e:
         logger.exception("Couldn't start process.")
