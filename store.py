@@ -21,9 +21,12 @@ def ssm_pass():
 @memoize
 def read_params(logger):
     try:
-        profile = os.environ['MACHINE_ENV']
+        profile='DEV'
+        if 'MACHINE_ENV' in os.environ:
+            profile = os.environ['MACHINE_ENV']
         config = read_config(profile=profile)
         params = {}
+
         params['password'] = config['target_db']['password']
         params['ssm_name'] = config['target_db']['ssm_name']
 
@@ -31,7 +34,7 @@ def read_params(logger):
         logger.info("Target host - "+params['host'])
 
         params['port'] = config['target_db']['port']
-        logger.info("Target port - "+params['port'])
+        logger.info("Target port - "+ str(params['port']))
 
         params['username'] = config['target_db']['username']
         logger.info("Target username - "+params['username'])
@@ -55,10 +58,10 @@ def read_params(logger):
         logger.info("Degree of parallelism - "+ str(params['degree_of_parallelism']))
 
         logger.info('Reading configuration successfully.')
+
+        return params
     except Exception as e:
         logger.exception("Config file couldn't load")
-
-    return params
 
 def create_db_connection(logger,hostname,database,username,password,port):
     try:
