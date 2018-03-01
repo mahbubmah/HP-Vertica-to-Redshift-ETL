@@ -12,7 +12,6 @@
       "host": "ec2-52-90-229-247.compute-1.amazonaws.com",
       "port": 5433,
       "db_name": "sabredb",
-      "tables": "DimMktSource",
       "username": "dbadmin"
     },
     "target_db": {
@@ -21,7 +20,6 @@
       "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
       "port": 5439,
       "db_name": "qsdata",
-      "tables": "DimMktSource",
       "username": "admin"
     },
     "tables": [
@@ -55,7 +53,6 @@
       "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
       "port": 5439,
       "db_name": "qsdata",
-      "tables": "DimMktSource",
       "username": "admin"
     },
     "tables": [

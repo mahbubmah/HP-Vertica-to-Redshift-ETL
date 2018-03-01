@@ -1,6 +1,4 @@
 import sys
-sys.path.append('./env/lib/python2.7/site-packages/')
-sys.path.append('./env/lib64/python2.7/site-packages/')
 import argparse
 import subprocess
 import psycopg2

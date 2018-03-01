@@ -1,7 +1,5 @@
 import sys
 import time
-sys.path.append('./env/lib/python2.7/site-packages/')
-sys.path.append('./env/lib64/python2.7/site-packages/')
 import psycopg2
 import os
 from utill import *
