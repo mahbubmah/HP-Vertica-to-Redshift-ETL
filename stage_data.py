@@ -7,7 +7,10 @@ import vertica_python
 import json
 from utill import memoize, read_config
 import os
-from utill import *
+from logger import *
+import multiprocessing
+from functools import partial
+from multiprocessing import Pool
 
 @memoize
 def ssm_pass():
@@ -22,7 +25,9 @@ def ssm_pass():
 def read_params(logger):
     try:
         logger.info('Starting reading configuration....')
-        profile = os.environ['MACHINE_ENV']
+        profile='DEV'
+        if 'MACHINE_ENV' in os.environ:
+            profile = os.environ['MACHINE_ENV']
         config = read_config(profile=profile)
         params = {}
         params['password'] = config['source_db']['password']
@@ -35,7 +40,7 @@ def read_params(logger):
         logger.info("Source Host - "+params['host'])
 
         params['port'] = config['source_db']['port']
-        logger.info("Source port - "+params['port'])
+        logger.info("Source port - "+str(params['port']))
 
         params['username'] = config['source_db']['username']
         logger.info("Source username - "+params['username'])
@@ -47,14 +52,22 @@ def read_params(logger):
 
         params['target_s3_path'] = config['aws']['s3_path']
         logger.info("s3 bucket path - "+params['target_s3_path'])
+
+        max_process = multiprocessing.cpu_count()
+        if(max_process<=config['aws']['degree_of_parallelism']  or config['aws']['degree_of_parallelism'] <0):
+            logger.info ("Setting degree of parallelism to cpu count "+ str(max_process))
+            params['degree_of_parallelism'] = max_process
+        else:
+            params['degree_of_parallelism']= config['aws']['degree_of_parallelism']
+
+        logger.info("Degree of parallelism - "+ str(params['degree_of_parallelism']))
+
         logger.info('Reading configuration successfully.')
 
         return params
 
     except Exception as e:
         logger.exception("Config file couldn't load")
-        raise
-    
 
 def connect_vertica_db(logger,params):
     try:
@@ -67,12 +80,11 @@ def connect_vertica_db(logger,params):
         db = params['db_name']
         conn_info = {'host': host, 'port': port, 'user': username, 'password': password, 'database': db,
                      'read_timeout': 600, 'unicode_error': 'strict', 'ssl': False, 'connection_timeout': 5}
-        logger.debug('Verticat db connection info: \n'+conn_info)
+        
         connection = vertica_python.connect(**conn_info)
         return connection
     except Exception as e:
         logger.exception("Can't connect to vertica database.")
-        raise
 
 
 def destroy_s3_bucket(s3_bucket_path):
@@ -97,7 +109,7 @@ def lower_table_column_names(logger,table_name):
 
         sql += "select lower(column_name) l_column_name, lower(data_type) data_type from v_catalog.columns t  where t.table_name='" + table_name_only + "' " + sql_schema_condition + ";"
         # print(sql)
-        logger.info('Query for select column: \n'+sql)
+        logger.info('Query for select column: \n\n'+sql+'\n')
 
         cursor.execute(sql)
         column_names = cursor.fetchall()
@@ -105,13 +117,11 @@ def lower_table_column_names(logger,table_name):
         return column_names
     except Exception as e:
         logger.exception("Couldn't read table column name")
-        raise
 
 
 def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column):
     try:
         l_column_names = lower_table_column_names(logger,table)
-        logger.debug('table column names:\n'+l_column_names)
 
         destroy_s3_bucket(s3_bucket_path)
         select_str = ', '.join(
@@ -120,21 +130,20 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
         if schema:
             table = schema + "." + table
         query = "select " + select_str + " FROM " + table + " t where $CONDITIONS"
-        logger.debug(' Sqoop job query: \n'+query)
+        logger.debug(' Sqoop job query: \n\n'+query+'\n')
         if (number_of_mappers > 1):
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m " + str(
                 number_of_mappers) + " --split-by t." + split_column + " -- --schema "+schema
         else:
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m 1" + " -- --schema "+schema
         
-        logger.debug('Sqoop job command: \n'+cmd_dump_to_s3)
+        logger.debug('Sqoop job command: \n\n'+cmd_dump_to_s3+'\n')
         logger.info('Sqoop job starting...')
-        sq_p=subprocess.call(cmd_dump_to_s3,stdout=subprocess.PIPE, shell=True)
-        logger.debug('Sqoop job output: \n'+sq_p.stdout.read())
+        sq_p=subprocess.Popen(cmd_dump_to_s3,stdout=subprocess.PIPE, shell=True)
+        logger.debug('Sqoop job output: \n\n'+sq_p.stdout.read()+'\n')
         logger.info('Sqoop job finished.')
     except Exception as e:
         logger.exception("Sqoop job process step error.")
-        raise
 
 
 def _process(params, table):
@@ -156,7 +165,7 @@ def _process(params, table):
             schema = ''
         split_column = table['split_column']
 
-        if split_column=='':
+        if split_column is None:
             logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
 
         s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
@@ -176,20 +185,24 @@ def _process(params, table):
         logger.info('Total time taken - '+str(round(process_end_time - process_start_time, 2))+' sec.')
     except Exception as e:
         logger.exception("Couldn't start process.")
-        raise
     
 
 
-def sync_data(params):    
-    for table in params['tables']:
-        _process(params, table)
+def sync_data(params):
+    max_process= multiprocessing.cpu_count()
+    if(max_process<=params['degree_of_parallelism']  or params['degree_of_parallelism'] <0):
+        pool = Pool(max_process)
+    else:
+        pool = Pool(params['degree_of_parallelism'])
+
+    sub_process=partial(_process, params)
+    pool.map(sub_process, params['tables'])
     
 
 if __name__ == '__main__':
     logger=jobLogger('root')
     try:        
         params = read_params(logger)
-        sync_data(logger,params)
+        sync_data(params)
     except Exception as e:
         logger.exception("Couldn't start process.")
-        raise
