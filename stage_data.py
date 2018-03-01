@@ -207,6 +207,6 @@ if __name__ == '__main__':
     logger=jobLogger('root')
     try:        
         params = read_params(logger)
-        # sync_data(params)
+        sync_data(params)
     except Exception as e:
         logger.exception("Couldn't start process.")
