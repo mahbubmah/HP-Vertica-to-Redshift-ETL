@@ -60,7 +60,6 @@ def read_params(logger):
 
     return params
 
-@memoize
 def create_db_connection(logger,hostname,database,username,password,port):
     try:
         connection = psycopg2.connect(

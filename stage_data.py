@@ -68,8 +68,7 @@ def read_params(logger):
 
     except Exception as e:
         logger.exception("Config file couldn't load")
-    
-@memoize
+
 def connect_vertica_db(logger,params):
     try:
         host = params['host']
