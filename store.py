@@ -122,13 +122,9 @@ def _process(params,table):
         logger.exception("Couldn't start process.")
 
 def store_data(params):
-    # for table in params['tables']:
-    #     _process(params, table)
-
     max_process= multiprocessing.cpu_count()
     if(max_process<=params['degree_of_parallelism']  or params['degree_of_parallelism'] <0):
         pool = Pool(max_process)
-        print('Maximun '+str(max_process)+' process using...')
     else:
         pool = Pool(params['degree_of_parallelism'] )
 

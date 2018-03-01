@@ -188,15 +188,12 @@ def _process(params, table):
     
 
 
-def sync_data(params):    
-    # for table in params['tables']:
-    #     _process(params, table)
+def sync_data(params):
     max_process= multiprocessing.cpu_count()
     if(max_process<=params['degree_of_parallelism']  or params['degree_of_parallelism'] <0):
         pool = Pool(max_process)
-        print('Maximun '+str(max_process)+' process using...')
     else:
-        pool = Pool(params['degree_of_parallelism'] )
+        pool = Pool(params['degree_of_parallelism'])
 
     sub_process=partial(_process, params)
     pool.map(sub_process, params['tables'])
