@@ -33,7 +33,7 @@ def clear_dir(path):
 
 def _process(params,logger):
     upload_log_file(params['target_s3_path'],logger)
-    # clear_dir("log")
+    clear_dir("log")
 
 if __name__ == '__main__':
     logger=jobLogger('root')
