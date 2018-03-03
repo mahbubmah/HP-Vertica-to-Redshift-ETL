@@ -94,9 +94,7 @@ def lower_table_column_names(logger,table_name):
     try:
         connection = connect_vertica_db(logger,params)
         cursor = connection.cursor()
-        table_name_with_schema = []
         table_name_only = table_name
-        table_schema = ''
         sql = ''
         sql_schema_condition = ''
         if '.' in table_name:
@@ -135,10 +133,10 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
         else:
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m 1" + " -- --schema "+schema
         
-        logger.debug('Sqoop job command: \n\n'+cmd_dump_to_s3+'\n')
+        # logger.debug('Sqoop job command: \n\n'+cmd_dump_to_s3+'\n')
         logger.info('Sqoop job starting...')
         sq_p=subprocess.Popen(cmd_dump_to_s3,stdout=subprocess.PIPE, shell=True)
-        logger.debug('Sqoop job output: \n\n'+sq_p.stdout.read()+'\n')
+        # logger.debug('Sqoop job output: \n\n'+sq_p.stdout.read()+'\n')
         logger.info('Sqoop job finished.')
     except Exception as e:
         logger.exception("Sqoop job process step error.")

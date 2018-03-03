@@ -77,17 +77,17 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn):
     try:
         cur = trgt_db_conn.cursor()
 
-        logger.info("Truncating table")
+        # logger.info("Truncating table")
         cur.execute("TRUNCATE "+table)
         cur.execute("COMMIT;")
-        logger.info("Truncate successful")
+        # logger.info("Truncate successful")
 
         cmd_copy_to_trgt = "copy "+ table +" from '"+ s3_bucket_path +"'"+" iam_role '"+aws_role_arn+"'"+" format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs';"
-        logger.debug("Redshift copy command \n\n "+cmd_copy_to_trgt +"\n")
+        # logger.debug("Redshift copy command \n\n "+cmd_copy_to_trgt +"\n")
 
         logger.info("Executing redshift copy command")
         cur.execute (cmd_copy_to_trgt)
-        logger.debug("Redshift copy command : "+cmd_copy_to_trgt)
+        # logger.debug("Redshift copy command : "+cmd_copy_to_trgt)
         cur.execute("COMMIT;")
         logger.info("Redshift copy process finished")
     except Exception as e:
