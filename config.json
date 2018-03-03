@@ -2,7 +2,7 @@
   "DEV": {
     "aws": {
       "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
-      "s3_path": "s3://ash.data/vertica/20180301",
+      "s3_path": "s3://ash.data/vertica/20180303",
       "degree_of_parallelism": 2
     },
     "source_db": {
@@ -34,7 +34,7 @@
   "STAGE": {
     "aws": {
       "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
-      "s3_path": "s3://ash.data/vertica/20180301",
+      "s3_path": "s3://ash.data/vertica/20180303",
       "degree_of_parallelism": 2
     },
     "source_db": {
