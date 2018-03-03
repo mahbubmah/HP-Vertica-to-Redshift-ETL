@@ -8,7 +8,7 @@ def jobLogger(name):
 	if not os.path.exists(log_file_name):
 		os.makedirs(log_file_name)
 
-	log_file_name+=time.strftime("%Y%m%d")+os.sep
+	# log_file_name+=time.strftime("%Y%m%d")+os.sep
 	if not os.path.exists(log_file_name):
 		os.makedirs(log_file_name)
 
