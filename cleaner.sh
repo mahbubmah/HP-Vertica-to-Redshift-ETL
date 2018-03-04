@@ -3,4 +3,4 @@
 #export MACHINE_ENV=DEV
 #export MACHINE_ENV=PROD
 source env/bin/activate
-python cleaner.py
+python finalizer.py
