@@ -80,7 +80,7 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn):
         cur.execute("TRUNCATE "+table)
         cur.execute("COMMIT;")
 
-        cmd_copy_to_trgt = "copy "+ table +" from '"+ s3_bucket_path +"_tmp'"+" iam_role '"+aws_role_arn+"'"+" format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs';"
+        cmd_copy_to_trgt = "copy "+ table +" from '"+ s3_bucket_path +"'"+" iam_role '"+aws_role_arn+"'"+" format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs';"
 
         logger.info("Executing redshift copy command")
         cur.execute (cmd_copy_to_trgt)
@@ -99,7 +99,7 @@ def _process(params,table):
         logger.info(table['name']+' process')
         table_name = table['name']
 
-        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
+        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "_tmp/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         password = params['password']
