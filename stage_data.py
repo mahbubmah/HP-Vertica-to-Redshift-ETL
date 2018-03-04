@@ -118,7 +118,6 @@ def lower_table_column_names(logger,table_name):
 def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column):
     try:
         l_column_names = lower_table_column_names(logger,table)
-
         destroy_s3_bucket(s3_bucket_path)
         select_str = ', '.join(
             'cast(to_hex(' + str(v[0]) + ') as varchar) ' + str(v[0]) if 'binary' in v[1] else str(v[0]) for v in
@@ -164,7 +163,7 @@ def _process(params, table):
         if split_column is None:
             logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
 
-        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
+        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "_tmp/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']
