@@ -99,7 +99,7 @@ def _process(params,table):
         logger.info(table['name']+' process')
         table_name = table['name']
 
-        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "_tmp/"
+        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         password = params['password']

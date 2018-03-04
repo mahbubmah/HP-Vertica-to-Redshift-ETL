@@ -163,7 +163,7 @@ def _process(params, table):
         if split_column is None:
             logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
 
-        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "_tmp/"
+        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']

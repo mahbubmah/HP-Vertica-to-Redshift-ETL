@@ -65,8 +65,8 @@ def _process(params,logger):
     else:
         pool = Pool(params['degree_of_parallelism'])
 
-    sub_process=partial(stage_temp_file, params)
-    pool.map(sub_process, params['tables'])
+    # sub_process=(stage_temp_file, params)
+    # pool.map(sub_process, params['tables'])
 
     upload_log_file(params['target_s3_path'],logger)
     clear_dir("log")
