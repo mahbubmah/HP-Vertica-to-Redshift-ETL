@@ -24,7 +24,7 @@ def read_params(logger):
 
 def upload_log_file(s3_bucket_path,logger):
     logger.info("Uploading log file")
-    command = "aws s3 sync ./log " + s3_bucket_path + "/" + time.strftime('%Y%m%d/%H%M%S') + "/"
+    command = "aws s3 sync ./log " + s3_bucket_path + "/logs/" + time.strftime('%Y%m%d/%H%M%S') + "/"
     subprocess.call(command, shell=True)
     logger.info("Log file uploaded successfully")
 
