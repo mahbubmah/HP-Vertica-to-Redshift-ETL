@@ -126,7 +126,6 @@ def store_data(params):
     sub_process=partial(_process, params)
     pool.map(sub_process, params['tables'])
 
-f
 if __name__ == '__main__':
     logger=jobLogger('root')
     try:
