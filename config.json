@@ -29,8 +29,8 @@
         "split_column": null,
         "mappers": 1,
         "filter_column": "MktSrcId",
-        "upper_value": 200,
-        "lower_value": 500,
+        "upper_value": 1000,
+        "lower_value": 500
       }
     ]
   },
