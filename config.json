@@ -30,7 +30,8 @@
         "mappers": 1,
         "filter_column": "MktSrcId",
         "upper_value": 1000,
-        "lower_value": 500
+        "lower_value": 500,
+        "unique_column": ["mktsrcid"]
       }
     ]
   },
