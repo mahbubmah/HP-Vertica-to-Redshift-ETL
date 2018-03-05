@@ -92,10 +92,10 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,up
         query+= aws_role_arn+"' format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs'; "
         
         if filter_column!='':
-            query+=" delete from "+table+ " m"
-            query+=" using #temp t where 1=1 "
+            query+=" delete from "+table
+            query+=" using #temp where 1=1 "
             if len(unique_column)>0:
-                query+='  '.join( ' and m.'+uc+'=t.'+uc for uc in unique_column)
+                query+='  '.join( ' and #temp.'+uc+'='+table+'.'+uc for uc in unique_column)
 
             query+="; commit; insert into "+table+" select * from #temp; "
             query+=" commit; drop table #temp; "        
