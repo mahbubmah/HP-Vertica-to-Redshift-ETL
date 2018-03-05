@@ -87,13 +87,13 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,up
             query+=" TRUNCATE "+table +";"
             query+=" COMMIT; "
 
-        query+ = " copy "+ (table if filter_column=="" else " #temp ") +" from '"
-        query+ = s3_bucket_path +"'  iam_role '"
-        query+ = aws_role_arn+"' format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs'; "
+        query+=" copy "+ (table if filter_column=="" else " #temp ") +" from '"
+        query+= s3_bucket_path +"'  iam_role '"
+        query+= aws_role_arn+"' format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs'; "
         
         if filter_column!='':
-            query+ = " delete from "+table+ " m"
-            query+ = " using #temp t where 1=1 "
+            query+= " delete from "+table+ " m"
+            query+= " using #temp t where 1=1 "
             if len(unique_column)>0:
                 query+ ='  '.join( ' and m.'+uc+'=t.'+uc for uc in unique_column)
 
