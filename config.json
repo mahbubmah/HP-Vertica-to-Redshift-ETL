@@ -27,7 +27,10 @@
         "schema": "public",
         "name": "DimMktSource",
         "split_column": null,
-        "mappers": 1
+        "mappers": 1,
+        "filter_column": "MktSrcId",
+        "upper_value": 200,
+        "lower_value": 500,
       }
     ]
   },
