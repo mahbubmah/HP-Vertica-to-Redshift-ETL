@@ -75,22 +75,37 @@ def create_db_connection(logger,hostname,database,username,password,port):
     except:
         logger.exception("Can't connect to redshift database.")
 
-def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn):
+def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,upper_value,lower_value,unique_column):
     try:
         cur = trgt_db_conn.cursor()
 
-        # logger.info("Truncating table")
-        cur.execute("TRUNCATE "+table)
-        cur.execute("COMMIT;")
-        # logger.info("Truncate successful")
+        query=''
 
-        cmd_copy_to_trgt = "copy "+ table +" from '"+ s3_bucket_path +"'"+" iam_role '"+aws_role_arn+"'"+" format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs';"
-        # logger.debug("Redshift copy command \n\n "+cmd_copy_to_trgt +"\n")
+        if filter_column!='':
+            query+=" create table #temp as select * from "+table + " limit 1; "
+            query+=" TRUNCATE #temp ; "
+            query+=" COMMIT; "
+        else:
+            query+=" TRUNCATE "+table +";"
+            query+=" COMMIT; "
 
-        logger.info("Executing redshift copy command")
-        cur.execute (cmd_copy_to_trgt)
-        # logger.debug("Redshift copy command : "+cmd_copy_to_trgt)
-        cur.execute("COMMIT;")
+        query+=" copy "+ (table if filter_column=="" else " #temp ") +" from '"
+        query+= s3_bucket_path +"'  iam_role '"
+        query+= aws_role_arn+"' format as avro 'auto' ACCEPTANYDATE DATEFORMAT 'YYYY-MM-DD' TIMEFORMAT 'epochmillisecs'; "
+        
+        if filter_column!='':
+            query+=" delete from "+table
+            query+=" using #temp where 1=1 "
+            if len(unique_column)>0:
+                query+='  '.join( ' and #temp.'+uc+'='+table+'.'+uc for uc in unique_column)
+
+            query+="; commit; insert into "+table+" select * from #temp; "
+            query+=" commit; drop table #temp; "        
+
+        query+=" commit;"
+        logger.info("Executing redshift copy command...")
+        logger.info('\n\n'+query+'\n\n')
+        cur.execute (query)
         logger.info("Redshift copy process finished")
     except Exception as e:
         logger.exception("Redshift copy process step error.")
@@ -104,6 +119,11 @@ def _process(params,table):
         logger.info(table['name']+' process')
         table_name = table['name']
 
+        filter_column=table['filter_column'] if table['filter_column'] is not None else ''
+        upper_value=str(table['upper_value']) if table['upper_value'] is not None else ''
+        lower_value=str(table['lower_value']) if table['lower_value'] is not None else ''
+        unique_column=table['unique_column'] if table['unique_column'] is not None else []
+
         s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
@@ -113,7 +133,7 @@ def _process(params,table):
             password = ssm_pass()
 
         connection = create_db_connection(logger,params['host'] , params['db_name'], params['username'],password,params['port'])
-        store(logger,connection,table_name,s3_bucket_path,params['role_arn'])
+        store(logger,connection,table_name,s3_bucket_path,params['role_arn'],filter_column,upper_value,lower_value,unique_column)
 
         process_end_time= time.time()
         logger.info('Process successfully completed.')
