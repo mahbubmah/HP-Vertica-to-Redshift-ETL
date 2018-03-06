@@ -115,8 +115,7 @@ def lower_table_column_names(logger,table_name):
         logger.exception("Couldn't read table column name")
 
 
-
-def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column,filter_column,upper_value,lower_value):
+def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column):
     try:
         l_column_names = lower_table_column_names(logger,table)
 
@@ -126,27 +125,11 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
             l_column_names)
         if schema:
             table = schema + "." + table
-
-        query="select " + select_str + " FROM " + table
-
-        if filter_column!='' and (upper_value!='' or lower_value!=''):
-            query=" select * from ( "+query+" ) as fil  where "+filter_column           
-            if upper_value!='' and lower_value!='':
-                query+=" between '"+lower_value+"' and '"+upper_value+"' "
-
-            if upper_value!='' and lower_value=='':
-                query+=" <= '"+upper_value+"' "
-
-            if upper_value=='' and lower_value!='':
-                query+=" >= '"+lower_value+"' "
-
-
-
-        query = "select * from ( "+query + " ) as t  where $CONDITIONS"
+        query = "select " + select_str + " FROM " + table + " t where $CONDITIONS"
         logger.debug(' Sqoop job query: \n\n'+query+'\n')
         if (number_of_mappers > 1):
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m " + str(
-                number_of_mappers) + " --split-by " + split_column + " -- --schema "+schema
+                number_of_mappers) + " --split-by t." + split_column + " -- --schema "+schema
         else:
             cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query '" + query + "' --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m 1" + " -- --schema "+schema
         
@@ -178,10 +161,6 @@ def _process(params, table):
             schema = ''
         split_column = table['split_column']
 
-        filter_column=table['filter_column'] if table['filter_column'] is not None else ''
-        upper_value=str(table['upper_value']) if table['upper_value'] is not None else ''
-        lower_value=str(table['lower_value']) if table['lower_value'] is not None else ''
-
         if split_column is None:
             logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
 
@@ -195,7 +174,7 @@ def _process(params, table):
             logger.info('Logging using ssm_pass')
             password = ssm_pass()
 
-        stage_src_data(logger,schema,table_name, s3_bucket_path, params['src_driver'], src_db_url, params['username'], password,number_of_mappers, split_column,filter_column,upper_value,lower_value)
+        stage_src_data(logger,schema,table_name, s3_bucket_path, params['src_driver'], src_db_url, params['username'], password,number_of_mappers, split_column)
         
         process_end_time= time.time()
         logger.info('Process successfully completed.')
