@@ -61,6 +61,7 @@
     },
     "tables": [
       {
+//        "schema": "SHSCRSWHGSummary",
         "schema": "public",
         "name": "DimMktSource",
         "split_column": null,
