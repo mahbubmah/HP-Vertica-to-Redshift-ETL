@@ -1,27 +1,3 @@
-#local
-.vscode/
-note-*.txt
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-*.pyc
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-*.egg-info/
-.installed.cfg
-*.egg
 # User-specific stuff:
 .idea/workspace.xml
 .idea/tasks.xml
