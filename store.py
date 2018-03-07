@@ -124,7 +124,8 @@ def _process(params,table):
         process_start_time= time.time()
         logger.info('Starting process...')
         logger.info(table['name']+' process')
-        table_name = table['name']
+        table_name = table['schema']+"."+table['name']
+        src_schema =  table['schema']
 
         filter_column=''
         if 'filter_column' in table:
@@ -144,7 +145,7 @@ def _process(params,table):
 
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
-        s3_bucket_path = params['target_s3_path'] +"/" +table_name + "/" + date_prefix +"/" 
+        s3_bucket_path =  params['target_s3_path'] +"/"+src_schema+"/" +table['name'] + "/" + date_prefix +"/" 
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         password = params['password']

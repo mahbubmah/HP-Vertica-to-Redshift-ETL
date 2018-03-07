@@ -185,6 +185,7 @@ def _process(params, table):
                 logger.info("You've set the job to sun on single mapper, this might take longer time for procssing.")
 
         logger.info(table['name']+' process using '+str(number_of_mappers)+' mapper(s)')
+        
         if table['schema']:
             schema = table['schema']
         else:
@@ -225,7 +226,7 @@ def _process(params, table):
 
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
-        s3_bucket_path = params['target_s3_path'] + "/" + table_name + "/" + date_prefix +"/"
+        s3_bucket_path = params['target_s3_path'] + "/"+schema+"/" + table_name + "/" + date_prefix +"/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']
