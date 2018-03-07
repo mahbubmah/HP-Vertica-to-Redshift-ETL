@@ -34,7 +34,8 @@ def read_config(path='config.json',profile="DEV"):
         os.rename(file_name,"config.json")
         path='config.json'
     config = json.load(open(path))
-    return config[profile]
+    
+    return (config[profile] if profile in config else config)
 
 def download(path):  
     file_name = path.split("/").pop()
