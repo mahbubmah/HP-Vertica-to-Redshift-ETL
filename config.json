@@ -3,7 +3,7 @@
     "aws": {
       "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
       "s3_path": "s3://ash.data/vertica/stage-folder",
-      "degree_of_parallelism": 2
+      "dop": 2
     },
     "source_db": {
       "password": "vfr45tgb",
@@ -21,25 +21,13 @@
       "port": 5439,
       "db_name": "qsdata",
       "username": "admin"
-    },
-    "tables": [
-      {
-        "schema": "public",
-        "name": "DimMktSource",
-        "split_column": null,
-        "mappers": 1,
-        "filter_column": "MktSrcId",
-        "upper_value": 1000,
-        "lower_value": 500,
-        "unique_column": ["mktsrcid"]
-      }
-    ]
+    }
   },
   "STAGE": {
     "aws": {
       "role_arn": "arn:aws:iam::324827999179:role/myRedshiftRole",
       "s3_path": "s3://ash.data/vertica/stage-folder",
-      "degree_of_parallelism": 2
+      "dop": 2
     },
     "source_db": {
       "password": "vfr45tgb",
@@ -54,18 +42,10 @@
       "password": "Vfr45tgb",
       "ssm_name": "vertica-pw",
       "driver": "com.vertica.jdbc.Driver",
-      "host": "rsdata2.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
+      "host": "rsdata.c5y5lcyfmqhg.us-east-1.redshift.amazonaws.com",
       "port": 5439,
       "db_name": "qsdata",
       "username": "admin"
-    },
-    "tables": [
-      {
-        "schema": "SHSCRSWHGSummary",
-        "name": "DimMktSource",
-        "split_column": null,
-        "mappers": 1
-      }
-    ]
+    }
   }
 }

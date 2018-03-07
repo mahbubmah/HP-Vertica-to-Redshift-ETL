@@ -1,0 +1,14 @@
+[
+    {
+      "schema": "public",
+      "name": "DimMktSource",
+      "split_column": null,
+      "mappers": 1,
+      "filter_column": "CreateDt",
+      "upper_value": 1000,
+      "unique_column": ["mktsrcid"],
+      "delta_time": 24,
+      "delta_time_unit": "hour",
+      "delta_time_pattern" "yyyy-mm-dd hh:mm:ss"
+    }
+]
