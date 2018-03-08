@@ -79,8 +79,8 @@ def connect_vertica_db(logger,params):
         logger.exception("Can't connect to vertica database.")
 
 
-def destroy_s3_bucket(s3_bucket_path):
-    command = "aws s3 rm " + s3_bucket_path + " --recursive"
+def destroy_s3_bucket(s3_bucket_path,exclude_dir=''):
+    command = "aws s3 rm " + s3_bucket_path + " --recursive " +((" --exclude "+exclude_dir) if exclude_dir != '' else '')
     subprocess.call(command, shell=True)
 
 
@@ -158,11 +158,19 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
 
         query = "select * from ( "+query + " ) as t  where \$CONDITIONS"
         logger.debug(' Sqoop job query: \n\n'+query+'\n')
+        tmp_file =open("tmp.txt","r")
+        date_prefix = tmp_file.read()
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query \"" + query + "\" --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m " + str(
                 number_of_mappers) + ((" --split-by " + split_column) if split_column !='' else '')  + " -- --schema "+schema
         logger.info("Sqoop job command \n\n"+cmd_dump_to_s3+"\n\n")
         logger.info('Sqoop job starting...')
-        subprocess.call(cmd_dump_to_s3, shell=True)
+        pipe=subprocess.Popen(cmd_dump_to_s3, shell=True,stdout = subprocess.PIPE, bufsize=10**8)
+        pipe.wait()
+
+        if filter_column=='':
+            logger.info('deleting previous files.....')
+            destroy_s3_bucket(s3_bucket_path.replace(date_prefix+"/",""),date_prefix+"/*")
+
         logger.info('Sqoop job finished.')
     except Exception as e:
         logger.exception("Sqoop job process step error.")
@@ -227,12 +235,9 @@ def _process(params, table):
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
 
-        s3_bucket_path = params['target_s3_path'] + "/"+schema+"/" + table_name + "/"
-
-        if filter_column=='':
-            destroy_s3_bucket(s3_bucket_path)
+        s3_bucket_path = params['target_s3_path'] + "/"+schema+"/" + table_name + "/"+date_prefix +"/"
         
-        s3_bucket_path+= date_prefix +"/"
+
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']
