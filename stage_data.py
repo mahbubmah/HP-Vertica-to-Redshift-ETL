@@ -112,7 +112,7 @@ def lower_table_column_names(logger,table_name):
 
 def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column,filter_column,upper_value,lower_value,delta_time,delta_time_unit,delta_time_pattern):
     try:
-        l_column_names = lower_table_column_names(logger,table)
+        l_column_names = lower_table_column_names(logger,schema+'.'+table)
 
         destroy_s3_bucket(s3_bucket_path)
         select_str = ', '.join(
