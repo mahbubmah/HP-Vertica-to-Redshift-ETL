@@ -1,0 +1,85 @@
+{
+  "type" : "record",
+  "name" : "QueryResult",
+  "doc" : "Sqoop import of QueryResult",
+  "fields" : [ {
+    "name" : "mktsrcid",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "mktsrcid",
+    "sqlType" : "-5"
+  }, {
+    "name" : "mktsrcguid",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "mktsrcguid",
+    "sqlType" : "12"
+  }, {
+    "name" : "htlguid",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "htlguid",
+    "sqlType" : "12"
+  }, {
+    "name" : "chnguid",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "chnguid",
+    "sqlType" : "12"
+  }, {
+    "name" : "mktsrccd",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "mktsrccd",
+    "sqlType" : "12"
+  }, {
+    "name" : "createdt",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "createdt",
+    "sqlType" : "12"
+  }, {
+    "name" : "updatedt",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "updatedt",
+    "sqlType" : "12"
+  }, {
+    "name" : "langid",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "langid",
+    "sqlType" : "-5"
+  }, {
+    "name" : "mktsrcnm",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "mktsrcnm",
+    "sqlType" : "12"
+  }, {
+    "name" : "mktsrcdesc",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "mktsrcdesc",
+    "sqlType" : "12"
+  }, {
+    "name" : "htlid",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "htlid",
+    "sqlType" : "-5"
+  }, {
+    "name" : "chnid",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "chnid",
+    "sqlType" : "-5"
+  }, {
+    "name" : "tdwloaddatetime",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "tdwloaddatetime",
+    "sqlType" : "12"
+  } ],
+  "tableName" : "QueryResult"
+}
