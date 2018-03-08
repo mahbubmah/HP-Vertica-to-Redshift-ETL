@@ -226,7 +226,13 @@ def _process(params, table):
 
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
-        s3_bucket_path = params['target_s3_path'] + "/"+schema+"/" + table_name + "/" + date_prefix +"/"
+
+        s3_bucket_path = params['target_s3_path'] + "/"+schema+"/" + table_name + "/"
+
+        if filter_column=='':
+            destroy_s3_bucket(s3_bucket_path)
+        
+        s3_bucket_path+= date_prefix +"/"
         logger.info('Processed file will save to - '+s3_bucket_path)
 
         src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']

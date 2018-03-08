@@ -82,10 +82,10 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,up
         if filter_column!=''  and int(total_record_res_before[0])>0:
             query+=" create table #temp as select * from "+table + " limit 1; "
             query+=" TRUNCATE #temp ; "
-            query+=" COMMIT; "
+           
         else:
             query+=" TRUNCATE "+table +";"
-            query+=" COMMIT; "
+            
 
         query+=" copy "+ (table if filter_column=="" or int(total_record_res_before[0])==0 else " #temp ") +" from '"
         query+= s3_bucket_path +"'  iam_role '"
