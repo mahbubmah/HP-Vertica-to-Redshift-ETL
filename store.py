@@ -13,8 +13,9 @@ import json
 import argparse
 
 @memoize
-def ssm_pass():
-    out = subprocess.Popen('aws ssm get-parameters --names "' + params['ssm_name'] + '" --with-decryption',
+def ssm_pass(ssm_name):
+    assert ssm_name is not None
+    out = subprocess.Popen('aws ssm get-parameters --names "' + ssm_name + '" --with-decryption',
                            stdout=subprocess.PIPE, shell=True)
     params = json.loads(out.stdout.read())
     # taking first or last version only
@@ -23,8 +24,8 @@ def ssm_pass():
 
 def read_params(args,logger,config,params):
     try:
-        params['password'] = config['target_db']['password']
-        params['ssm_name'] = config['target_db']['ssm_name']
+        params['password'] = config['target_db'].get('password', None)
+        params['ssm_name'] = config['target_db'].get('ssm_name', None)
 
         params['host'] = config['target_db']['host']
         logger.info("Target host - "+params['host'])
@@ -149,7 +150,7 @@ def _process(params,table):
         password = params['password']
         if not password:
             logger.info('Logging using ssm_pass')
-            password = ssm_pass()
+            password = ssm_pass(params['ssm_name'])
 
         connection = create_db_connection(logger,params['host'] , params['db_name'], params['username'],password,params['port'])
         store(logger,connection,table_name,s3_bucket_path,params['role_arn'],filter_column,upper_value,lower_value,unique_column)
