@@ -13,8 +13,8 @@ import json
 import argparse
 
 @memoize
-def ssm_pass():
-    out = subprocess.Popen('aws ssm get-parameters --names "' + params['ssm_name'] + '" --with-decryption',
+def ssm_pass(ssm_name):
+    out = subprocess.Popen('aws ssm get-parameters --names "' + ssm_name + '" --with-decryption',
                            stdout=subprocess.PIPE, shell=True)
     params = json.loads(out.stdout.read())
     # taking first or last version only
@@ -28,8 +28,8 @@ def read_params(args,logger,config,params):
         logger.info('Starting reading configuration....')
 
         
-        params['password'] = config['source_db']['password']
-        params['ssm_name'] = config['source_db']['ssm_name']
+        params['password'] = config['source_db'].get('password', None)
+        params['ssm_name'] = config['source_db'].get('ssm_name', None)
 
         params['src_driver'] = config['source_db']['driver']
         logger.info("Source Driver - "+params['src_driver'])
@@ -69,7 +69,7 @@ def connect_vertica_db(logger,params):
         username = params['username']
         password = params['password']
         if not password:
-            password = ssm_pass()
+            password = ssm_pass(params['ssm_name'])
         db = params['db_name']
         conn_info = {'host': host, 'port': port, 'user': username, 'password': password, 'database': db,
                      'read_timeout': 600, 'unicode_error': 'strict', 'ssl': False, 'connection_timeout': 5}
