@@ -1,0 +1,17 @@
+[
+      {
+      "schema": "SHSCRSWHGSummary",
+      "name": "DimMktSource2"
+    },
+    {
+      "schema": "SHSCRSWHGSummary",
+      "name": "DimMktSource",
+      "mappers": 1,
+      "filter_column": "TDWLoadDateTime",
+      "upper_value": 1000,
+      "unique_column": ["mktsrcid"],
+      "delta_time": 24,
+      "delta_time_unit": "hour",
+      "delta_time_pattern": "YYYY-MM-DD HH:MI:SS"
+    }
+]

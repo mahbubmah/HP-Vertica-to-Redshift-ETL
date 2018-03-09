@@ -1,0 +1,8 @@
+[
+    {
+      "schema": "public",
+      "name": "DimMktSource",
+      "split_column": null,
+      "mappers": 1
+    }
+]
