@@ -18,8 +18,9 @@ def ssm_pass():
                            stdout=subprocess.PIPE, shell=True)
     params = json.loads(out.stdout.read())
     # taking first or last version only
-    return params['Parameters'][0]['Value']
-
+    if type(params['Parameters'])==list:
+        return params['Parameters'][0]['Value']
+    return params['Parameters']['Value']
 
 
 def read_params(args,logger,config,params):
