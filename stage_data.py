@@ -251,7 +251,7 @@ def _process(params, table):
         password = params['password']
         if not password:
             logger.info('Logging using ssm_pass')
-            password = ssm_pass()
+            password = ssm_pass(params['ssm_name'])
 
         stage_src_data(logger,schema,table_name, s3_bucket_path, params['src_driver'], src_db_url, params['username'], password,number_of_mappers, split_column,filter_column,upper_value,lower_value,delta_time,delta_time_unit,delta_time_pattern)
 
