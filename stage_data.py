@@ -14,6 +14,7 @@ import argparse
 
 @memoize
 def ssm_pass(ssm_name):
+    assert ssm_name is not None
     out = subprocess.Popen('aws ssm get-parameters --names "' + ssm_name + '" --with-decryption',
                            stdout=subprocess.PIPE, shell=True)
     params = json.loads(out.stdout.read())
