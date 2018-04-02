@@ -11,6 +11,7 @@ from functools import partial
 from multiprocessing import Pool
 import json
 import argparse
+from avro_utill import remove_empty_avro_file
 
 @memoize
 def ssm_pass(ssm_name):
@@ -71,6 +72,7 @@ def create_db_connection(logger,hostname,database,username,password,port):
 
 def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,upper_value,lower_value,unique_column):
     try:
+        remove_empty_avro_file(s3_bucket_path)
         cur = trgt_db_conn.cursor()
 
         cur.execute('select count(*) rcnt from  '+table)
