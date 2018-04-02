@@ -15,10 +15,13 @@ def remove_empty_avro_file(path):
     bucket = s3.Bucket(bucket_name)
     for obj in bucket.objects.filter(Prefix=prefix):
         file='s3://{0}/{1}'.format(bucket.name, obj.key)
-        file_stream= read_s3_data(file)
-        is_empty=is_empty_avro_file(file_stream)
-        if is_empty:
-            remove_s3_file(file)
+        try:
+            file_stream= read_s3_data(file)
+            is_empty=is_empty_avro_file(file_stream)
+            if is_empty:
+                remove_s3_file(file)
+        except:
+            continue
 
 
 def read_s3_data(path):
