@@ -26,42 +26,41 @@ def ssm_pass(ssm_name):
 
 def read_params(args,logger,config,params):
     try:
-        logger.info('Starting reading configuration....')
+        logger('Starting reading configuration....','info','root')
 
         
         params['password'] = config['source_db'].get('password', None)
         params['ssm_name'] = config['source_db'].get('ssm_name', None)
 
         params['src_driver'] = config['source_db']['driver']
-        logger.info("Source Driver - "+params['src_driver'])
+        logger("Source Driver - "+params['src_driver'],'info','root')
 
         params['host'] = config['source_db']['host']
-        logger.info("Source Host - "+params['host'])
+        logger("Source Host - "+params['host'],'info','root')
 
         params['port'] = config['source_db']['port']
-        logger.info("Source port - "+str(params['port']))
+        logger("Source port - "+str(params['port']),'info','root')
 
         params['username'] = config['source_db']['username']
-        logger.info("Source username - "+params['username'])
+        logger("Source username - "+params['username'],'info','root')
 
         params['db_name'] = config['source_db']['db_name']
-        logger.info("Source database - "+params['db_name'])
+        logger("Source database - "+params['db_name'],'info','root')
 
         
 
         params['target_s3_path'] = config['aws']['s3_path']
-        logger.info("s3 bucket path - "+params['target_s3_path'])
+        logger("s3 bucket path - "+params['target_s3_path'],'info','root')
 
         params['dop']= args.dop
 
-        logger.info("Degree of parallelism - "+ str(params['dop']))
+        logger("Degree of parallelism - "+ str(params['dop']),'info','root')
 
-        logger.info('Reading configuration successfully.')
-
+        logger('Reading configuration successfully.','info','root')
         return params
 
     except Exception as e:
-        logger.exception("Config file couldn't load")
+        logger("Config file couldn't load",'exception','root')
 
 def connect_vertica_db(logger,params):
     try:
@@ -78,7 +77,7 @@ def connect_vertica_db(logger,params):
         connection = vertica_python.connect(**conn_info)
         return connection
     except Exception as e:
-        logger.exception("Can't connect to vertica database.")
+        logger("Can't connect to vertica database.",'exception','root')
 
 
 def destroy_s3_bucket(s3_bucket_path,exclude_dir=''):
@@ -102,19 +101,20 @@ def lower_table_column_names(logger,table_name):
 
         sql += "select lower(column_name) l_column_name, lower(data_type) data_type from v_catalog.columns t  where t.table_name='" + table_name_only + "' " + sql_schema_condition + ";"
 
-        logger.info('Query for select column: \n\n'+sql+'\n')
+        logger.info('Query for select column: \n\n'+sql+'\n','info','root')
 
         cursor.execute(sql)
         column_names = cursor.fetchall()
         connection.close()
         return column_names
     except Exception as e:
-        logger.exception("Couldn't read table column name")
+        logger("Couldn't read table column name",'exception','root')
 
 
 
 def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, src_username, src_password, number_of_mappers,split_column,filter_column,upper_value,lower_value,delta_time,delta_time_unit,delta_time_pattern):
     try:
+        table_log = schema+"."+table
         l_column_names = lower_table_column_names(logger,schema+'.'+table)
 
         destroy_s3_bucket(s3_bucket_path)
@@ -155,38 +155,39 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
 
         cur.execute('select count(*) rcnt from ( '+query+' ) as t')
         total_record_res=cur.fetchone()
-        logger.info('Total number of row will process: '+str(total_record_res[0]))
+        logger('Total number of row will process: '+str(total_record_res[0]),'info',table_log)
         con.close()
 
 
         query = "select * from ( "+query + " ) as t  where \$CONDITIONS"
-        logger.debug(' Sqoop job query: \n\n'+query+'\n')
+        logger.debug(' Sqoop job query: \n\n'+query+'\n','debug',table_log)
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query \"" + query + "\" --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m " + str(
                 number_of_mappers) + ((" --split-by " + split_column) if split_column !='' else '')  + " -- --schema "+schema
-        logger.info("Sqoop job command \n\n"+cmd_dump_to_s3+"\n\n")
-        logger.info('Sqoop job starting...')
+        logger("Sqoop job command \n\n"+cmd_dump_to_s3+"\n\n",'info',table_log)
+        logger('Sqoop job starting...','info',table_log)
         pipe=subprocess.Popen(cmd_dump_to_s3, shell=True,stdout = subprocess.PIPE, bufsize=10**8)
         pipe.wait()
         
         
 
         if filter_column=='':
-            logger.info('deleting previous files.....')
+            logger('deleting previous files.....','info',table_log)
             destroy_s3_bucket(s3_bucket_path.replace(date_prefix+"/",""),date_prefix+"/*")
 
-        logger.info('Sqoop job finished.')
+        logger('Sqoop job finished.','info',table_log)
     except Exception as e:
-        logger.exception("Sqoop job process step error.")
+        logger("Sqoop job process step error.",'exception',table_log)
 
 
 def _process(params, table):
-    logger=jobLogger(table['name'])
+    table_log = table['schema']+"."+table['name']
+    jobLogger(table_log)
     try:        
         process_start_time= time.time()
 
-        logger.info('Starting process...')
+        logger.info('Starting process...','info',table_log)
         
 
         table_name = table['name']
@@ -195,9 +196,9 @@ def _process(params, table):
         if 'mappers' in table:  
             number_of_mappers= table['mappers']
             if table['mappers']==1:
-                logger.info("You've set the job to sun on single mapper, this might take longer time for procssing.")
+                logger("You've set the job to sun on single mapper, this might take longer time for procssing.",'info',table_log)
 
-        logger.info(table['name']+' process using '+str(number_of_mappers)+' mapper(s)')
+        logger(table['name']+' process using '+str(number_of_mappers)+' mapper(s)','info',table_log)
         
         if table['schema']:
             schema = table['schema']
@@ -207,11 +208,11 @@ def _process(params, table):
         split_column=''
         if 'split_column' in table:            
             if table['split_column'] is None:
-                logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
+                logger('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job','warning',table_log)
             else:
                 split_column = table['split_column']
         else:
-            logger.warn('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job')
+            logger('There is no split column found. sqoop job might run on single mapper. this will take longer time to run job','warning',table_log)
 
         filter_column=''
         if 'filter_column' in table:
@@ -244,22 +245,22 @@ def _process(params, table):
         
         
 
-        logger.info('Processed file will save to - '+s3_bucket_path)
+        logger('Processed file will save to - '+s3_bucket_path,'info',table_log)
 
         src_db_url = "jdbc:vertica://" + params['host'] + "/" + params['db_name']
-        logger.info('Source Database URL: '+src_db_url)
+        logger('Source Database URL: '+src_db_url,'info',table_log)
         password = params['password']
         if not password:
-            logger.info('Logging using ssm_pass')
+            logger('Logging using ssm_pass','info',table_log)
             password = ssm_pass(params['ssm_name'])
 
         stage_src_data(logger,schema,table_name, s3_bucket_path, params['src_driver'], src_db_url, params['username'], password,number_of_mappers, split_column,filter_column,upper_value,lower_value,delta_time,delta_time_unit,delta_time_pattern)
 
         process_end_time= time.time()
-        logger.info('Process successfully completed.')
-        logger.info('Total time taken - '+str(round(process_end_time - process_start_time, 2))+' sec.')
+        logger('Process successfully completed.','info',table_log)
+        logger('Total time taken - '+str(round(process_end_time - process_start_time, 2))+' sec.','info',table_log)
     except Exception as e:
-        logger.exception("Couldn't start process.")
+        logger("Couldn't start process.",'exception',table_log)
     
 
 
@@ -276,7 +277,7 @@ if __name__ == '__main__':
     tmp_file =open("tmp.txt","w")
     tmp_file.write(date_prefix)
     tmp_file.close() 
-    logger=jobLogger('root')
+    jobLogger('root')
     try:
         parser = argparse.ArgumentParser(description='data transfer')
         params = {}
@@ -304,7 +305,7 @@ if __name__ == '__main__':
 
         else:
             if '.' not in args.tables:
-                logger.error('Please provide the schema name')
+                logger('Please provide the schema name','error','root')
 
             table_name_with_schema = str(args.tables).split('.')
             table_name_only = table_name_with_schema[1]
@@ -317,5 +318,5 @@ if __name__ == '__main__':
 
         sync_data(params)
     except Exception as e:
-        logger.exception("Couldn't start process.")
+        logger("Couldn't start process.",'exception','root')
 
