@@ -37,10 +37,10 @@ def read_params(logger):
         logger("Config file couldn't load",'exception','root')
 
 def upload_log_file(s3_bucket_path,logger):
-    logger.info("Uploading log file",'info','root')
+    logger("Uploading log file",'info','root')
     command = "aws s3 sync ./log " + s3_bucket_path + "/logs/"
     subprocess.call(command, shell=True)
-    logger.info("Log file uploaded successfully",'info','root')
+    logger("Log file uploaded successfully",'info','root')
 
 def clear_dir(path):
     shutil.rmtree(path)

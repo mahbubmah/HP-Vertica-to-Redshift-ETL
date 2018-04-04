@@ -101,7 +101,7 @@ def lower_table_column_names(logger,table_name):
 
         sql += "select lower(column_name) l_column_name, lower(data_type) data_type from v_catalog.columns t  where t.table_name='" + table_name_only + "' " + sql_schema_condition + ";"
 
-        logger.info('Query for select column: \n\n'+sql+'\n','info','root')
+        logger('Query for select column: \n\n'+sql+'\n','info',table_name)
 
         cursor.execute(sql)
         column_names = cursor.fetchall()
@@ -160,7 +160,7 @@ def stage_src_data(logger,schema,table, s3_bucket_path, src_driver, src_db_url, 
 
 
         query = "select * from ( "+query + " ) as t  where \$CONDITIONS"
-        logger.debug(' Sqoop job query: \n\n'+query+'\n','debug',table_log)
+        logger(' Sqoop job query: \n\n'+query+'\n','debug',table_log)
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
         cmd_dump_to_s3 = "sqoop import --driver " + src_driver + " --connect " + src_db_url + " --username " + src_username + " --password " + src_password + " --query \"" + query + "\" --target-dir " + s3_bucket_path + " --direct --as-avrodatafile -m " + str(
@@ -187,7 +187,7 @@ def _process(params, table):
     try:        
         process_start_time= time.time()
 
-        logger.info('Starting process...','info',table_log)
+        logger('Starting process...','info',table_log)
         
 
         table_name = table['name']
