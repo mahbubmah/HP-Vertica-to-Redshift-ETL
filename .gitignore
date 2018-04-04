@@ -13,3 +13,4 @@
 .idea/dynamic.xml
 .idea/uiDesigner.xml
 *.log
+.idea/*

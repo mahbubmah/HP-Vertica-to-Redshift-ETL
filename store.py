@@ -31,32 +31,32 @@ def read_params(args,logger,config,params):
         params['ssm_name'] = config['target_db'].get('ssm_name', None)
 
         params['host'] = config['target_db']['host']
-        logger.info("Target host - "+params['host'])
+        logger("Target host - "+params['host'],'info','root')
 
         params['port'] = config['target_db']['port']
-        logger.info("Target port - "+ str(params['port']))
+        logger("Target port - "+ str(params['port']),'info','root')
 
         params['username'] = config['target_db']['username']
-        logger.info("Target username - "+params['username'])
+        logger("Target username - "+params['username'],'info','root')
 
         params['db_name'] = config['target_db']['db_name']
-        logger.info("Target Database - "+params['db_name'])
+        logger("Target Database - "+params['db_name'],'info','root')
         
 
         params['target_s3_path'] = config['aws']['s3_path']
-        logger.info("s3 bucket path - "+params['target_s3_path'])
+        logger("s3 bucket path - "+params['target_s3_path'],'info','root')
 
         params['role_arn'] = config['aws']['role_arn']
 
         params['dop']= args.dop
 
-        logger.info("Degree of parallelism - "+ str(params['dop']))
+        logger("Degree of parallelism - "+ str(params['dop']),'info','root')
 
-        logger.info('Reading configuration successfully.')
+        logger('Reading configuration successfully.','info','root')
 
         return params
     except Exception as e:
-        logger.exception("Config file couldn't load")
+        logger("Config file couldn't load",'exception','root')
 
 def create_db_connection(logger,hostname,database,username,password,port):
     try:
@@ -68,7 +68,7 @@ def create_db_connection(logger,hostname,database,username,password,port):
             port = port)
         return connection
     except:
-        logger.exception("Can't connect to redshift database.")
+        logger("Can't connect to redshift database.",'exception','root')
 
 def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,upper_value,lower_value,unique_column):
     try:
@@ -77,10 +77,10 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,up
 
         cur.execute('select count(*) rcnt from  '+table)
         total_record_res_before=cur.fetchone()
-        logger.info('Total number of row before copy: '+str(total_record_res_before[0]))        
+        logger('Total number of row before copy: '+str(total_record_res_before[0]),'info',table)        
         
         if int(total_record_res_before[0])==0:
-            logger.info('There is no data in target table. Full copy process will run.')
+            logger('There is no data in target table. Full copy process will run.','info',table)
 
         query=''
 
@@ -104,30 +104,31 @@ def store(logger,trgt_db_conn,table,s3_bucket_path,aws_role_arn,filter_column,up
             query+=" commit; drop table #temp; "        
 
         query+=" commit;"
-        logger.info("Executing redshift copy command...")
-        logger.info('\n\n'+query+'\n\n')
+        logger("Executing redshift copy command...",'info',table)
+        logger('\n\n'+query+'\n\n','info',table)
         cur.execute (query)
 
 
         cur.execute('select count(*) rcnt from  '+table)
         total_record_res_after=cur.fetchone()
-        logger.info('Total number of row after copy: '+str(total_record_res_after[0]))
+        logger('Total number of row after copy: '+str(total_record_res_after[0]),'info',table)
 
-        logger.info('Total number of row copied: '+str(int(total_record_res_after[0])-int(total_record_res_before[0])))
+        logger('Total number of row copied: '+str(int(total_record_res_after[0])-int(total_record_res_before[0])),'info',table)
         
-        logger.info("Redshift copy process finished")
+        logger("Redshift copy process finished",'info',table)
 
     except Exception as e:
-        logger.exception("Redshift copy process step error.")
+        logger("Redshift copy process step error.",'exception',table)
 
 def _process(params,table):
-    logger=jobLogger(table['name'])
+    table_name = table['schema']+"."+table['name']
+    jobLogger(table_name)
 
     try:
         process_start_time= time.time()
-        logger.info('Starting process...')
-        logger.info(table['name']+' process')
-        table_name = table['schema']+"."+table['name']
+        logger('Starting process...','info',table_name)
+        logger(table['name']+' process','info',table_name)
+        
         src_schema =  table['schema']
 
         filter_column=''
@@ -149,21 +150,21 @@ def _process(params,table):
         tmp_file =open("tmp.txt","r")
         date_prefix = tmp_file.read()
         s3_bucket_path =  params['target_s3_path'] +"/"+src_schema+"/" +table['name'] + "/" + date_prefix +"/" 
-        logger.info('Processed file will save to - '+s3_bucket_path)
+        logger('Processed file will save to - '+s3_bucket_path,'info',table_name)
 
         password = params['password']
         if not password:
-            logger.info('Logging using ssm_pass')
+            logger('Logging using ssm_pass','info',table_name)
             password = ssm_pass(params['ssm_name'])
 
         connection = create_db_connection(logger,params['host'] , params['db_name'], params['username'],password,params['port'])
         store(logger,connection,table_name,s3_bucket_path,params['role_arn'],filter_column,upper_value,lower_value,unique_column)
 
         process_end_time= time.time()
-        logger.info('Process successfully completed.')
-        logger.info('Total time taken - '+str(round(process_end_time - process_start_time, 2))+' sec.')
+        logger('Process successfully completed.','info',table_name)
+        logger('Total time taken - '+str(round(process_end_time - process_start_time, 2))+' sec.','info',table_name)
     except:
-        logger.exception("Couldn't start process.")
+        logger("Couldn't start process.","exception",table_name)
 
 def store_data(params):
     pool = Pool(params['dop'] )
@@ -173,7 +174,7 @@ def store_data(params):
 
 
 if __name__ == '__main__':
-    logger=jobLogger('root')
+    jobLogger('root')
     try:
         parser = argparse.ArgumentParser(description='data transfer')
         params = {}
@@ -199,7 +200,7 @@ if __name__ == '__main__':
             params['tables'] = read_tables(path=str(args.tables))
         else:
             if '.' not in args.tables:
-                logger.error('Please provide the schema name')
+                logger('Please provide the schema name','error','root')
                 
             table_name_with_schema = args.tables.split('.')
             table_name_only = table_name_with_schema[1]
@@ -211,5 +212,5 @@ if __name__ == '__main__':
 
         store_data(params)
     except Exception as e:
-        logger.exception("Couldn't start process.")
+        logger("Couldn't start process.","exception","root")
 
